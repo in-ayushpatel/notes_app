@@ -1,0 +1,195 @@
+import { FileNode, GitHubUser, GitHubRepo } from '@/types'
+import { cookies } from 'next/headers'
+
+const GITHUB_API = 'https://api.github.com'
+
+export async function getAccessToken(): Promise<string | null> {
+  const cookieStore = await cookies()
+  return cookieStore.get('gh_token')?.value ?? null
+}
+
+export async function getSelectedRepo(): Promise<{ owner: string; repo: string } | null> {
+  const cookieStore = await cookies()
+  const raw = cookieStore.get('selected_repo')?.value
+  if (!raw) return null
+  try {
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+}
+
+export async function githubFetch(
+  path: string,
+  token: string,
+  options: RequestInit = {}
+): Promise<Response> {
+  return fetch(`${GITHUB_API}${path}`, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      'Content-Type': 'application/json',
+      ...(options.headers ?? {}),
+    },
+  })
+}
+
+export async function getAuthenticatedUser(token: string): Promise<GitHubUser> {
+  const res = await githubFetch('/user', token)
+  if (!res.ok) throw new Error('Failed to fetch user')
+  return res.json()
+}
+
+export async function getUserRepos(token: string): Promise<GitHubRepo[]> {
+  const res = await githubFetch('/user/repos?per_page=100&sort=updated&visibility=all', token)
+  if (!res.ok) throw new Error('Failed to fetch repos')
+  return res.json()
+}
+
+export async function getRepoTree(
+  token: string,
+  owner: string,
+  repo: string
+): Promise<FileNode[]> {
+  // Get repo info (default branch)
+  const branchRes = await githubFetch(`/repos/${owner}/${repo}`, token)
+  if (!branchRes.ok) throw new Error('Failed to fetch repo info')
+  const repoData = await branchRes.json()
+  const defaultBranch = repoData.default_branch
+
+  // An empty repo has no commits → no default branch SHA → tree API returns 409
+  if (!defaultBranch) return []
+
+  // Get the full tree recursively
+  const treeRes = await githubFetch(
+    `/repos/${owner}/${repo}/git/trees/${defaultBranch}?recursive=1`,
+    token
+  )
+
+  // 409 = empty repo (no commits yet), 404 = branch doesn't exist yet
+  if (treeRes.status === 409 || treeRes.status === 404) return []
+  if (!treeRes.ok) throw new Error(`Failed to fetch tree (${treeRes.status})`)
+
+  const treeData = await treeRes.json()
+
+  // Filter to only notes/ directory and build nested structure
+  const items = (treeData.tree as Array<{ path: string; type: string }>)
+    .filter((item) => item.path.startsWith('notes/') && (item.type === 'blob' ? item.path.endsWith('.md') : true))
+
+  return buildTree(items)
+}
+
+function buildTree(items: Array<{ path: string; type: string }>): FileNode[] {
+  const root: FileNode[] = []
+  const nodeMap = new Map<string, FileNode>()
+
+  // Sort: folders first, then files
+  const sorted = [...items].sort((a, b) => {
+    if (a.type !== b.type) return a.type === 'tree' ? -1 : 1
+    return a.path.localeCompare(b.path)
+  })
+
+  for (const item of sorted) {
+    const parts = item.path.split('/')
+    // Remove 'notes' prefix
+    const relativeParts = parts.slice(1)
+    if (relativeParts.length === 0) continue
+
+    const name = relativeParts[relativeParts.length - 1]
+    const node: FileNode = {
+      name,
+      path: item.path,
+      type: item.type === 'tree' ? 'folder' : 'file',
+      children: item.type === 'tree' ? [] : undefined,
+    }
+
+    if (relativeParts.length === 1) {
+      root.push(node)
+      nodeMap.set(item.path, node)
+    } else {
+      const parentPath = parts.slice(0, parts.length - 1).join('/')
+      const parent = nodeMap.get(parentPath)
+      if (parent && parent.children) {
+        parent.children.push(node)
+      }
+      nodeMap.set(item.path, node)
+    }
+  }
+
+  return root
+}
+
+export async function getFileContent(
+  token: string,
+  owner: string,
+  repo: string,
+  path: string
+): Promise<{ content: string; sha: string }> {
+  const res = await githubFetch(`/repos/${owner}/${repo}/contents/${path}`, token)
+  if (!res.ok) throw new Error('Failed to fetch file')
+  const data = await res.json()
+  const content = Buffer.from(data.content, 'base64').toString('utf-8')
+  return { content, sha: data.sha }
+}
+
+export async function updateFile(
+  token: string,
+  owner: string,
+  repo: string,
+  path: string,
+  content: string,
+  message: string,
+  sha?: string
+): Promise<{ sha: string }> {
+  const encoded = Buffer.from(content, 'utf-8').toString('base64')
+
+  // If no SHA provided, try to get it
+  let fileSha = sha
+  if (!fileSha) {
+    try {
+      const existing = await getFileContent(token, owner, repo, path)
+      fileSha = existing.sha
+    } catch {
+      // File doesn't exist yet, that's fine
+    }
+  }
+
+  const body: Record<string, string> = {
+    message,
+    content: encoded,
+  }
+  if (fileSha) body.sha = fileSha
+
+  const res = await githubFetch(`/repos/${owner}/${repo}/contents/${path}`, token, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  })
+
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message ?? 'Failed to update file')
+  }
+
+  const data = await res.json()
+  return { sha: data.content.sha }
+}
+
+export async function deleteFile(
+  token: string,
+  owner: string,
+  repo: string,
+  path: string,
+  message: string,
+  sha: string
+): Promise<void> {
+  const res = await githubFetch(`/repos/${owner}/${repo}/contents/${path}`, token, {
+    method: 'DELETE',
+    body: JSON.stringify({ message, sha }),
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message ?? 'Failed to delete file')
+  }
+}

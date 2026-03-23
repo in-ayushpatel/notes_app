@@ -1,0 +1,30 @@
+'use client'
+
+import { useEditorStore } from '@/store/editorStore'
+
+export function EmptyState() {
+  return (
+    <div style={{
+      flex: 1, display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      color: 'var(--text-muted)',
+    }}>
+      <div style={{ fontSize: '56px', marginBottom: '16px', opacity: 0.5 }}>📝</div>
+      <h3 style={{ fontWeight: '600', marginBottom: '8px', color: 'var(--text-secondary)', fontSize: '15px' }}>
+        No note selected
+      </h3>
+      <p style={{ fontSize: '13px', lineHeight: '1.6', textAlign: 'center', maxWidth: '240px' }}>
+        Pick a file from the sidebar, or right-click a folder to create a new note.
+      </p>
+      <div style={{
+        marginTop: '24px', padding: '12px 16px',
+        background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+        borderRadius: '10px', fontSize: '12px', lineHeight: '1.8',
+      }}>
+        <div><kbd style={{ background: 'var(--bg-tertiary)', padding: '1px 5px', borderRadius: '4px', fontSize: '11px' }}>⌘K</kbd> Search notes</div>
+        <div><kbd style={{ background: 'var(--bg-tertiary)', padding: '1px 5px', borderRadius: '4px', fontSize: '11px' }}>⌘S</kbd> Save note</div>
+        <div>Right-click folder → New file/folder</div>
+      </div>
+    </div>
+  )
+}
