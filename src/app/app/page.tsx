@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/authStore'
 import { useTreeStore } from '@/store/treeStore'
 import { useEditorStore } from '@/store/editorStore'
 import { Sidebar } from '@/components/sidebar/Sidebar'
+import { CommandPalette } from '@/components/ui/CommandPalette'
 import { Editor } from '@/components/editor/Editor'
 import { Preview } from '@/components/editor/Preview'
 import { TopBar } from '@/components/editor/TopBar'
@@ -175,6 +176,10 @@ export default function AppPage() {
 
       {/* ── Main content area ────────────────────────────────────────────── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+        
+        {/* Global Modal Overlays */}
+        <CommandPalette />
+
         <TopBar viewMode={viewMode} onSetMode={setViewMode} />
 
         <div
