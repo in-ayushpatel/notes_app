@@ -78,6 +78,8 @@ export const useTreeStore = create<TreeState>((set, get) => ({
       if (res.ok) {
         const { tree } = await res.json()
         set({ tree })
+        const { useSearchStore } = await import('@/store/searchStore')
+        useSearchStore.getState().indexTree(tree)
       }
     } catch {
       set({ tree: [] })
@@ -94,6 +96,8 @@ export const useTreeStore = create<TreeState>((set, get) => ({
       if (res.ok) {
         const { tree } = await res.json()
         set({ tree })
+        const { useSearchStore } = await import('@/store/searchStore')
+        useSearchStore.getState().indexTree(tree)
       }
     } catch {
       /* ignore refresh errors silently */

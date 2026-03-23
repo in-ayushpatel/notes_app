@@ -21,8 +21,8 @@ export function SearchBox({ onResultClick }: SearchBoxProps) {
       }
       if (e.key === 'Escape') clearSearch()
     }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
+    window.addEventListener('keydown', handler, true)
+    return () => window.removeEventListener('keydown', handler, true)
   }, [clearSearch])
 
   return (
