@@ -50,6 +50,8 @@ export default function AppPage() {
     setViewMode(mode)
   }
 
+  const initialMobileCheck = useRef(false)
+
   useEffect(() => {
     setMounted(true)
     fetchUser()
@@ -58,7 +60,11 @@ export default function AppPage() {
     const checkMobile = () => {
       const mobile = window.innerWidth < 768
       setIsMobile(mobile)
-      if (mobile) setViewMode('preview')
+      
+      if (mobile && !initialMobileCheck.current) {
+        setViewMode('preview')
+        initialMobileCheck.current = true
+      }
     }
     
     checkMobile()
