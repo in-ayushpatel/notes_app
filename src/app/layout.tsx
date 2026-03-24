@@ -5,7 +5,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
-  title: 'DevNotes — GitHub-Synced Markdown Notes',
+  title: 'vNotes — GitHub-Synced Markdown Notes',
   description: 'A developer-first notes app powered by your GitHub repository. Write in Markdown, sync automatically, own your data.',
   keywords: ['notes', 'markdown', 'github', 'developer', 'obsidian'],
 }

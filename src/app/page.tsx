@@ -47,7 +47,7 @@ export default function LandingPage() {
           WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
           marginBottom: '16px',
         }}>
-          DevNotes
+          vNotes
         </h1>
 
         <p style={{

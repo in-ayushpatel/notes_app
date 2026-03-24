@@ -14,7 +14,7 @@ export function EmptyState() {
         No note selected
       </h3>
       <p style={{ fontSize: '13px', lineHeight: '1.6', textAlign: 'center', maxWidth: '240px' }}>
-        Pick a file from the sidebar, or right-click a folder to create a new note.
+        Pick a file from the sidebar, or click <b style={{ color: 'var(--text-primary)' }}>+</b> to create a new note.
       </p>
       <div style={{
         marginTop: '24px', padding: '12px 16px',
@@ -23,9 +23,8 @@ export function EmptyState() {
       }}>
         <div><kbd style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border)', padding: '1px 5px', borderRadius: '4px', fontSize: '11px', marginRight: '6px' }}>⌘P</kbd> Go to file</div>
         <div><kbd style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border)', padding: '1px 5px', borderRadius: '4px', fontSize: '11px', marginRight: '6px' }}>⌘K</kbd> Search notes</div>
-        <div><kbd style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border)', padding: '1px 5px', borderRadius: '4px', fontSize: '11px', marginRight: '6px' }}>⌘S</kbd> Save note</div>
         <div style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid var(--border)', color: 'var(--text-muted)' }}>
-          Click <b style={{ color: 'var(--text-primary)' }}>+</b> or Right-click folder for new note
+          Click <b style={{ color: 'var(--text-primary)' }}>+</b> for new note
         </div>
       </div>
     </div>

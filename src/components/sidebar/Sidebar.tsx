@@ -104,7 +104,7 @@ export function Sidebar({ onToggle }: { onToggle?: () => void }) {
             </button>
           )}
           <span style={{ fontSize: '18px' }}>🧠</span>
-          <span style={{ fontWeight: '700', fontSize: '15px', color: 'var(--text-primary)', flex: 1 }}>DevNotes</span>
+          <span style={{ fontWeight: '700', fontSize: '15px', color: 'var(--text-primary)', flex: 1 }}>vNotes</span>
 
           {/* + New button */}
           {selectedRepo && (

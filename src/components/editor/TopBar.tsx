@@ -64,7 +64,7 @@ export function TopBar({ viewMode, editorPreference, onSetMode, sidebarCollapsed
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginRight: '8px' }}>
             <span style={{ fontSize: '18px' }}>🧠</span>
-            {!isMobile && <span style={{ fontWeight: '700', fontSize: '15px', color: 'var(--text-primary)' }}>DevNotes</span>}
+            {!isMobile && <span style={{ fontWeight: '700', fontSize: '15px', color: 'var(--text-primary)' }}>vNotes</span>}
           </div>
         </div>
       )}
