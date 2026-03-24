@@ -26,7 +26,6 @@ export default function AppPage() {
 
   const [viewMode, setViewMode] = useState<ViewMode>('edit')
   const [mounted, setMounted] = useState(false)
-  const [showToc, setShowToc] = useState(false)
 
   // ── Sidebar collapse / resize ─────────────────────────────────────────────
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -186,7 +185,7 @@ export default function AppPage() {
         {/* Global Modal Overlays */}
         <CommandPalette />
 
-        <TopBar viewMode={viewMode} onSetMode={setViewMode} showToc={showToc} onToggleToc={() => setShowToc(v => !v)} />
+        <TopBar viewMode={viewMode} onSetMode={setViewMode} />
 
         <div style={{ flex: 1, overflow: 'hidden', display: 'flex', minHeight: 0, position: 'relative' }}>
           <div
@@ -235,7 +234,7 @@ export default function AppPage() {
             <Editor />
           )}
           </div>
-          <TocPanel showDesktop={showToc} />
+          <TocPanel />
         </div>
       </div>
     </div>
