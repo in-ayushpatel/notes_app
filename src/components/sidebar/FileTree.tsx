@@ -82,6 +82,12 @@ export function FileTree({ nodes }: { nodes: FileNode[] }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ path: node.path, sha, message: `delete: ${node.path}` }),
         })
+      } else {
+        await fetch('/api/node', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: node.path }),
+        })
       }
       await refreshTree()
     } catch (err) {

@@ -302,3 +302,59 @@ export async function moveFileOrFolder(
   })
   if (!updateRefRes.ok) throw new Error('Failed to update branch ref')
 }
+
+export async function deleteNode(
+  token: string,
+  owner: string,
+  repo: string,
+  path: string
+): Promise<void> {
+  const refRes = await githubFetch(`/repos/${owner}/${repo}/git/refs/heads/main`, token)
+  if (!refRes.ok) throw new Error('Failed to get branch ref')
+  const refData = await refRes.json()
+  const currentCommitSha = refData.object.sha
+
+  const commitRes = await githubFetch(`/repos/${owner}/${repo}/git/commits/${currentCommitSha}`, token)
+  if (!commitRes.ok) throw new Error('Failed to get current commit')
+  const commitData = await commitRes.json()
+  const baseTreeSha = commitData.tree.sha
+
+  const treePayload = {
+    base_tree: baseTreeSha,
+    tree: [
+      {
+        path: path,
+        mode: '100644', // Type and mode are technically ignored when sha is null, but we provide it for schema safety
+        type: 'blob',
+        sha: null
+      }
+    ]
+  }
+
+  const treeRes = await githubFetch(`/repos/${owner}/${repo}/git/trees`, token, {
+    method: 'POST',
+    body: JSON.stringify(treePayload)
+  })
+  if (!treeRes.ok) throw new Error('Failed to create new tree for deletion')
+  const treeData2 = await treeRes.json()
+  const newTreeSha = treeData2.sha
+
+  const commitPayload = {
+    message: `Delete ${path}`,
+    tree: newTreeSha,
+    parents: [currentCommitSha]
+  }
+  const newCommitRes = await githubFetch(`/repos/${owner}/${repo}/git/commits`, token, {
+    method: 'POST',
+    body: JSON.stringify(commitPayload)
+  })
+  if (!newCommitRes.ok) throw new Error('Failed to create commit for deletion')
+  const newCommitData = await newCommitRes.json()
+  const newCommitSha = newCommitData.sha
+
+  const updateRefRes = await githubFetch(`/repos/${owner}/${repo}/git/refs/heads/main`, token, {
+    method: 'PATCH',
+    body: JSON.stringify({ sha: newCommitSha })
+  })
+  if (!updateRefRes.ok) throw new Error('Failed to update branch ref for deletion')
+}
