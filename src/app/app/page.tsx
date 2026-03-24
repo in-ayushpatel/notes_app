@@ -136,21 +136,21 @@ export default function AppPage() {
       {/* ── Entrance Animation 🌊 ────────────────────────────────────── */}
       <style>{`
         @keyframes vnote-splash-fade {
-          0% { opacity: 1; transform: scale(1); }
-          100% { opacity: 0; transform: scale(1.15); filter: blur(10px); }
+          0% { opacity: 1; transform: scale(1); filter: blur(0); }
+          100% { opacity: 0; transform: scale(1.08); filter: blur(10px); }
         }
-        @keyframes vnote-pulse {
-          0% { transform: scale(1); opacity: 0.8; }
-          50% { transform: scale(1.08); opacity: 1; filter: drop-shadow(0 0 15px rgba(88,166,255,0.4)); }
-          100% { transform: scale(1); opacity: 0.8; }
+        @keyframes vnote-pulse-polished {
+          0% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(88,166,255,0.2)); }
+          50% { transform: scale(1.05); filter: drop-shadow(0 0 30px rgba(88,166,255,0.5)); }
+          100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(88,166,255,0.2)); }
         }
         @keyframes vnote-text-reveal {
           0% { opacity: 0; letter-spacing: -2px; transform: translateY(10px); }
-          100% { opacity: 1; letter-spacing: 4px; transform: translateY(0); }
+          100% { opacity: 1; letter-spacing: 2px; transform: translateY(0); }
         }
         @keyframes vnote-ui-reveal {
-          0% { opacity: 0; transform: scale(0.97) translateY(10px); filter: blur(5px); }
-          100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+          0% { opacity: 0; transform: scale(0.98) translateY(10px); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
         }
         @keyframes vnote-sidebar-reveal {
           0% { opacity: 0; transform: translateX(-40px); }
@@ -168,28 +168,27 @@ export default function AppPage() {
           animation: vnote-splash-fade 0.8s forwards;
         }
         
-        .splash-logo { font-size: 80px; animation: vnote-pulse 1.8s infinite ease-in-out; }
+        .splash-logo { font-size: 80px; animation: vnote-pulse-polished 2s infinite ease-in-out; }
         .splash-text { 
           font-size: 32px; font-weight: 800; color: var(--text-primary); 
           margin-top: 24px; animation: vnote-text-reveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          text-transform: uppercase;
         }
 
         .app-reveal {
           opacity: 0;
-          animation: vnote-ui-reveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          animation-delay: 1.1s;
+          animation: vnote-ui-reveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          animation-delay: 1s;
         }
         .sidebar-animated {
           opacity: 0;
-          animation: vnote-sidebar-reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          animation-delay: 1.2s;
+          animation: vnote-sidebar-reveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          animation-delay: 1.1s;
         }
       `}</style>
 
       {/* Splash Screen Overlay */}
       {!isIntroFinished && (
-        <div className={`splash-overlay ${mounted ? 'exit' : ''}`} style={{ animationDelay: '1s' }}>
+        <div className={`splash-overlay ${mounted ? 'exit' : ''}`}>
           <div className="splash-logo">🧠</div>
           <h1 className="splash-text">vNotes</h1>
         </div>
