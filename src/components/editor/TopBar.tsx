@@ -3,7 +3,7 @@
 import { useEditorStore } from '@/store/editorStore'
 import { useTreeStore } from '@/store/treeStore'
 
-type ViewMode = 'edit' | 'split' | 'preview'
+type ViewMode = 'edit' | 'rich' | 'split' | 'preview'
 
 interface TopBarProps {
   viewMode: ViewMode
@@ -14,7 +14,8 @@ interface TopBarProps {
 }
 
 const MODES: { mode: ViewMode; label: string; title: string }[] = [
-  { mode: 'edit',    label: '✍️',  title: 'Edit only' },
+  { mode: 'edit',    label: '✍️',  title: 'Raw Markdown' },
+  { mode: 'rich',    label: '✨',  title: 'Rich Editor' },
   { mode: 'split',   label: '⬜⬜', title: 'Side-by-side' },
   { mode: 'preview', label: '👁',  title: 'Preview only' },
 ]
