@@ -73,7 +73,7 @@ export default function AppPage() {
 
     const timer = setTimeout(() => {
       setIsIntroFinished(true)
-    }, 1500)
+    }, 1900)
 
     return () => {
       window.removeEventListener('resize', checkMobile)
@@ -165,7 +165,7 @@ export default function AppPage() {
           pointer-events: none;
         }
         .splash-overlay.exit {
-          animation: vnote-splash-fade 0.8s forwards;
+          animation: vnote-splash-fade 0.4s 1.8s forwards;
         }
         
         .splash-logo { font-size: 80px; animation: vnote-pulse-polished 2s infinite ease-in-out; }
@@ -176,13 +176,11 @@ export default function AppPage() {
 
         .app-reveal {
           opacity: 0;
-          animation: vnote-ui-reveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          animation-delay: 1s;
+          animation: vnote-ui-reveal 0.4s 1.8s forwards;
         }
         .sidebar-animated {
           opacity: 0;
-          animation: vnote-sidebar-reveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          animation-delay: 1.1s;
+          animation: vnote-sidebar-reveal 0.4s 1.9s forwards;
         }
       `}</style>
 
