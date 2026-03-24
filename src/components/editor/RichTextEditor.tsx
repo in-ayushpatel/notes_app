@@ -68,10 +68,10 @@ export function RichTextEditor() {
       <div style={{ flex: 1, overflowY: 'auto' }}>
         <style>{`
           .prose-container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 60px 80px;
+            width: 100%;
+            padding: 40px 60px;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            box-sizing: border-box;
           }
           @media (max-width: 768px) {
             .prose-container { padding: 30px 20px; }
