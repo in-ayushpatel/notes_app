@@ -5,7 +5,7 @@ export function Toolbar({ editor }: { editor: Editor | null }) {
 
   const btnStyle = (active: boolean) => ({
     background: active ? 'var(--bg-hover)' : 'transparent',
-    color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
+    color: active ? 'var(--text-primary)' : '#8b949e',
     border: 'none', borderRadius: '4px',
     padding: '4px 8px', fontSize: '13px', fontWeight: active ? '600' : '400',
     cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',

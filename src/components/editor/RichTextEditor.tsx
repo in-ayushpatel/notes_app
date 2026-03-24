@@ -35,7 +35,7 @@ export function RichTextEditor() {
     },
     editorProps: {
       attributes: {
-        class: 'prose-container focus:outline-none p-6 md:p-10 min-h-full',
+        class: 'prose-container focus:outline-none min-h-full',
       },
     },
   })
@@ -70,6 +70,7 @@ export function RichTextEditor() {
           .prose-container {
             max-width: 800px;
             margin: 0 auto;
+            padding: 40px;
           }
           .ProseMirror p { margin-top: 0; margin-bottom: 1em; line-height: 1.6; color: var(--text-primary); font-size: 15px; }
           .ProseMirror h1 { font-size: 2em; margin-top: 0; margin-bottom: 0.5em; font-weight: 700; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
