@@ -42,8 +42,8 @@ export function Preview() {
           img: ({ src, alt, ...props }) => {
             let finalSrc = src
             if (typeof src === 'string' && src.startsWith('.')) {
-              // rewrite relative src like .images/... to api
-              finalSrc = `/api/image?path=${src.replace(/^\.\/?/, '')}`
+              // rewrite relative src like .images/... to api, stripping only exactly './'
+              finalSrc = `/api/image?path=${src.replace(/^\.\//, '')}`
             }
             return <img src={finalSrc as string} alt={alt} {...props} style={{ maxWidth: '100%', borderRadius: '6px', margin: '16px 0' }} />
           },
