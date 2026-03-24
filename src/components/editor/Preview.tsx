@@ -39,6 +39,14 @@ export function Preview() {
              const id = String(children).toLowerCase().replace(/[^\w]+/g, '-')
              return <h6 id={id} {...props} style={{ scrollMarginTop: '20px' }}>{children}</h6>
           },
+          img: ({ src, alt, ...props }) => {
+            let finalSrc = src
+            if (typeof src === 'string' && src.startsWith('.')) {
+              // rewrite relative src like .images/... to api
+              finalSrc = `/api/image?path=${src.replace(/^\.\/?/, '')}`
+            }
+            return <img src={finalSrc as string} alt={alt} {...props} style={{ maxWidth: '100%', borderRadius: '6px', margin: '16px 0' }} />
+          },
           code({ node, inline, className, children, ...props }: any) {
             const match = /language-(\w+)/.exec(className || '')
             

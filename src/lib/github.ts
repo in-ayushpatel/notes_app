@@ -193,3 +193,41 @@ export async function deleteFile(
     throw new Error(err.message ?? 'Failed to delete file')
   }
 }
+
+export async function uploadBinary(
+  token: string,
+  owner: string,
+  repo: string,
+  path: string,
+  base64Content: string,
+  message: string
+): Promise<{ sha: string }> {
+  // raw base64 content must NOT be utf-8 encoded again
+  const body = { message, content: base64Content }
+
+  const res = await githubFetch(`/repos/${owner}/${repo}/contents/${path}`, token, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  })
+
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.message ?? 'Failed to upload binary file')
+  }
+
+  const data = await res.json()
+  return { sha: data.content.sha }
+}
+
+export async function getImageDownloadUrl(
+  token: string,
+  owner: string,
+  repo: string,
+  path: string
+): Promise<string> {
+  const res = await githubFetch(`/repos/${owner}/${repo}/contents/${path}`, token)
+  if (!res.ok) throw new Error('Failed to fetch image metadata')
+  const data = await res.json()
+  if (!data.download_url) throw new Error('No download URL available')
+  return data.download_url
+}

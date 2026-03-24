@@ -40,6 +40,64 @@ export function Editor() {
       }
     })
 
+    const handleFileUpload = async (file: File, view: EditorView, pos: number) => {
+      if (!file.type.startsWith('image/')) return false
+      const placeholder = `![Uploading ${file.name}...]`
+      view.dispatch({ changes: { from: pos, insert: placeholder } })
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+        const res = await fetch('/api/upload', { method: 'POST', body: formData })
+        if (!res.ok) throw new Error('Upload failed')
+        const { url } = await res.json()
+        
+        const currentDoc = view.state.doc.toString()
+        const index = currentDoc.indexOf(placeholder)
+        if (index !== -1) {
+          view.dispatch({ changes: { from: index, to: index + placeholder.length, insert: `![${file.name}](${url})` } })
+        }
+      } catch (err) {
+        const currentDoc = view.state.doc.toString()
+        const index = currentDoc.indexOf(placeholder)
+        if (index !== -1) {
+          view.dispatch({ changes: { from: index, to: index + placeholder.length, insert: `![Upload failed: ${file.name}]` } })
+        }
+      }
+      return true
+    }
+
+    const uploadHandlers = EditorView.domEventHandlers({
+      paste(e, view) {
+        const items = e.clipboardData?.items
+        if (!items) return false
+        for (const item of Array.from(items)) {
+          if (item.type.startsWith('image/')) {
+            const file = item.getAsFile()
+            if (file) {
+              e.preventDefault()
+              handleFileUpload(file, view, view.state.selection.main.head)
+              return true
+            }
+          }
+        }
+        return false
+      },
+      drop(e, view) {
+        const files = e.dataTransfer?.files
+        if (!files || files.length === 0) return false
+        const file = files[0]
+        if (file.type.startsWith('image/')) {
+          e.preventDefault()
+          const pos = view.posAtCoords({ x: e.clientX, y: e.clientY })
+          if (pos !== null) {
+            handleFileUpload(file, view, pos)
+            return true
+          }
+        }
+        return false
+      }
+    })
+
     const startState = EditorState.create({
       doc: openNote?.content ?? '',
       extensions: [
@@ -70,6 +128,7 @@ export function Editor() {
           '.cm-content': { paddingRight: '24px', paddingLeft: '8px' },
           '.cm-line': { paddingLeft: '4px' },
         }),
+        uploadHandlers,
         updateListener,
       ],
     })
