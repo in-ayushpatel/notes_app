@@ -183,20 +183,20 @@ export default function AppPage() {
           style={{
             position: 'absolute',
             left: sidebarCollapsed ? '28px' : `${sidebarWidth - 12}px`,
-            top: '48px',
-            transform: 'translateY(0)',
+            top: '50%',
+            transform: 'translateY(-50%)',
             zIndex: 20,
-            width: '24px', height: '28px',
+            width: '20px', height: '44px',
             background: 'var(--bg-tertiary)',
             border: '1px solid var(--border)',
-            borderRadius: '6px',
+            borderLeft: 'none',
+            borderRadius: '0 6px 6px 0',
             cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: 'var(--text-muted)',
-            fontSize: '11px',
+            fontSize: '10px',
             transition: 'left 0.2s ease, color 0.1s',
             padding: 0,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
           }}
           onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--accent)' }}
           onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)' }}
