@@ -19,11 +19,14 @@ export function EmptyState() {
       <div style={{
         marginTop: '24px', padding: '12px 16px',
         background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-        borderRadius: '10px', fontSize: '12px', lineHeight: '1.8',
+        borderRadius: '10px', fontSize: '12px', lineHeight: '2',
       }}>
-        <div><kbd style={{ background: 'var(--bg-tertiary)', padding: '1px 5px', borderRadius: '4px', fontSize: '11px' }}>⌘K</kbd> Search notes</div>
-        <div><kbd style={{ background: 'var(--bg-tertiary)', padding: '1px 5px', borderRadius: '4px', fontSize: '11px' }}>⌘S</kbd> Save note</div>
-        <div>Right-click folder → New file/folder</div>
+        <div><kbd style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border)', padding: '1px 5px', borderRadius: '4px', fontSize: '11px', marginRight: '6px' }}>⌘P</kbd> Go to file</div>
+        <div><kbd style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border)', padding: '1px 5px', borderRadius: '4px', fontSize: '11px', marginRight: '6px' }}>⌘K</kbd> Search notes</div>
+        <div><kbd style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border)', padding: '1px 5px', borderRadius: '4px', fontSize: '11px', marginRight: '6px' }}>⌘S</kbd> Save note</div>
+        <div style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid var(--border)', color: 'var(--text-muted)' }}>
+          Click <b style={{ color: 'var(--text-primary)' }}>+</b> or Right-click folder for new note
+        </div>
       </div>
     </div>
   )
