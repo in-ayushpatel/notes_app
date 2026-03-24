@@ -33,16 +33,31 @@ export function Toolbar({ editor }: { editor: Editor | null }) {
       display: 'flex', gap: '8px', padding: '10px 20px',
       borderBottom: '1px solid var(--border)', background: 'var(--bg-tertiary)',
       overflowX: 'auto', alignItems: 'center', flexShrink: 0,
-      width: '100%', boxSizing: 'border-box',
+      width: '100%', maxWidth: '100%', boxSizing: 'border-box',
       scrollbarWidth: 'none', // Firefox
       msOverflowStyle: 'none', // IE/Edge
-      boxShadow: '0 2px 4px rgba(0,0,0,0.08)'
+      boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
+      WebkitOverflowScrolling: 'touch', // smooth scroll on iOS
     }}>
       <style>{`
         .toolbar-container::-webkit-scrollbar { display: none; }
+        @media (max-width: 600px) {
+          .toolbar-container { 
+            gap: 4px !important; 
+            padding: 8px 12px !important; 
+          }
+          .toolbar-container .group-container {
+            gap: 1px !important;
+            padding: 2px !important;
+          }
+          .toolbar-container button {
+            width: 30px !important;
+            height: 30px !important;
+          }
+        }
       `}</style>
       
-      <div style={{ display: 'flex', gap: '2px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)', flexShrink: 0 }}>
+      <div className="group-container" style={{ display: 'flex', gap: '2px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)', flexShrink: 0 }}>
         <button
           onClick={() => editor.chain().focus().toggleBold().run()}
           style={btnStyle(editor.isActive('bold'), colors.style)}
@@ -66,7 +81,7 @@ export function Toolbar({ editor }: { editor: Editor | null }) {
         </button>
       </div>
       
-      <div style={{ display: 'flex', gap: '2px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)', flexShrink: 0 }}>
+      <div className="group-container" style={{ display: 'flex', gap: '2px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)', flexShrink: 0 }}>
         <button
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
           style={btnStyle(editor.isActive('heading', { level: 1 }), colors.heading)}
@@ -84,7 +99,7 @@ export function Toolbar({ editor }: { editor: Editor | null }) {
         ><span style={{ fontWeight: '800', fontSize: '11px' }}>H3</span></button>
       </div>
       
-      <div style={{ display: 'flex', gap: '2px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)', flexShrink: 0 }}>
+      <div className="group-container" style={{ display: 'flex', gap: '2px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)', flexShrink: 0 }}>
         <button
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           style={btnStyle(editor.isActive('bulletList'), colors.list)}
@@ -101,7 +116,7 @@ export function Toolbar({ editor }: { editor: Editor | null }) {
         </button>
       </div>
       
-      <div style={{ display: 'flex', gap: '2px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)', flexShrink: 0 }}>
+      <div className="group-container" style={{ display: 'flex', gap: '2px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)', flexShrink: 0 }}>
         <button
           onClick={() => editor.chain().focus().toggleCodeBlock().run()}
           style={btnStyle(editor.isActive('codeBlock'), colors.block)}
