@@ -74,9 +74,9 @@ export async function getRepoTree(
 
   const treeData = await treeRes.json()
 
-  // Filter to only notes/ directory and build nested structure
+  // Filter to only notes/ directory and exclude hidden .images folder, build nested structure
   const items = (treeData.tree as Array<{ path: string; type: string; sha: string }>)
-    .filter((item) => item.path.startsWith('notes/') && (item.type === 'blob' ? item.path.endsWith('.md') : true))
+    .filter((item) => item.path.startsWith('notes/') && !item.path.startsWith('notes/.images') && (item.type === 'blob' ? item.path.endsWith('.md') : true))
 
   return buildTree(items)
 }

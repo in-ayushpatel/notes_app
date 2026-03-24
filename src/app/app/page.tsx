@@ -176,13 +176,13 @@ export default function AppPage() {
       </div>
 
       {/* ── Sidebar collapse / expand toggle ────────────────────────────── */}
-      {!sidebarCollapsed && (
+      {!(sidebarCollapsed && isMobile) && (
         <button
-          onClick={() => setSidebarCollapsed(true)}
-          title="Collapse sidebar"
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           style={{
             position: 'absolute',
-            left: `${sidebarWidth - 12}px`,
+            left: sidebarCollapsed ? '28px' : `${sidebarWidth - 12}px`,
             top: '48px',
             transform: 'translateY(0)',
             zIndex: 20,
@@ -201,7 +201,7 @@ export default function AppPage() {
           onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--accent)' }}
           onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)' }}
         >
-          ◀
+          {sidebarCollapsed ? '▶' : '◀'}
         </button>
       )}
 
