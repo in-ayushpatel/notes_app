@@ -63,20 +63,22 @@ export function RichTextEditor() {
   if (!openNote) return null
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--bg-primary)' }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', width: '100%', background: 'var(--bg-primary)' }}>
       <Toolbar editor={editor} />
       <div style={{ flex: 1, overflowY: 'auto' }}>
         <style>{`
           .prose-container {
-            width: 100%;
-            padding: 40px 60px;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 40px 24px !important;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            box-sizing: border-box;
+            box-sizing: border-box !important;
           }
           @media (max-width: 768px) {
-            .prose-container { padding: 30px 20px; }
+            .prose-container { padding: 20px 16px !important; }
           }
-          .ProseMirror { min-height: 200px; }
+          .ProseMirror { min-height: 200px; width: 100% !important; }
           .ProseMirror p { margin: 0 0 1.25em; line-height: 1.8; color: #adbac7; font-size: 16px; }
           .ProseMirror h1 { font-size: 2.5em; margin: 0 0 0.6em; font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em; }
           .ProseMirror h2 { font-size: 1.8em; margin: 1.6em 0 0.6em; font-weight: 700; color: var(--text-primary); border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.3em; }
