@@ -15,6 +15,30 @@ export function Preview() {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
+          h1: ({ children, ...props }) => {
+             const id = String(children).toLowerCase().replace(/[^\w]+/g, '-')
+             return <h1 id={id} {...props} style={{ scrollMarginTop: '20px' }}>{children}</h1>
+          },
+          h2: ({ children, ...props }) => {
+             const id = String(children).toLowerCase().replace(/[^\w]+/g, '-')
+             return <h2 id={id} {...props} style={{ scrollMarginTop: '20px' }}>{children}</h2>
+          },
+          h3: ({ children, ...props }) => {
+             const id = String(children).toLowerCase().replace(/[^\w]+/g, '-')
+             return <h3 id={id} {...props} style={{ scrollMarginTop: '20px' }}>{children}</h3>
+          },
+          h4: ({ children, ...props }) => {
+             const id = String(children).toLowerCase().replace(/[^\w]+/g, '-')
+             return <h4 id={id} {...props} style={{ scrollMarginTop: '20px' }}>{children}</h4>
+          },
+          h5: ({ children, ...props }) => {
+             const id = String(children).toLowerCase().replace(/[^\w]+/g, '-')
+             return <h5 id={id} {...props} style={{ scrollMarginTop: '20px' }}>{children}</h5>
+          },
+          h6: ({ children, ...props }) => {
+             const id = String(children).toLowerCase().replace(/[^\w]+/g, '-')
+             return <h6 id={id} {...props} style={{ scrollMarginTop: '20px' }}>{children}</h6>
+          },
           code({ node, inline, className, children, ...props }: any) {
             const match = /language-(\w+)/.exec(className || '')
             

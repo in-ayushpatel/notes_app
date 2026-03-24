@@ -8,6 +8,8 @@ type ViewMode = 'edit' | 'split' | 'preview'
 interface TopBarProps {
   viewMode: ViewMode
   onSetMode: (m: ViewMode) => void
+  showToc: boolean
+  onToggleToc: () => void
 }
 
 const MODES: { mode: ViewMode; label: string; title: string }[] = [
@@ -16,7 +18,7 @@ const MODES: { mode: ViewMode; label: string; title: string }[] = [
   { mode: 'preview', label: '👁',  title: 'Preview only' },
 ]
 
-export function TopBar({ viewMode, onSetMode }: TopBarProps) {
+export function TopBar({ viewMode, onSetMode, showToc, onToggleToc }: TopBarProps) {
   const { openNote, saveStatus, saveNote, isDirty } = useEditorStore()
   const { selectedRepo } = useTreeStore()
 
@@ -84,6 +86,27 @@ export function TopBar({ viewMode, onSetMode }: TopBarProps) {
               onMouseEnter={e => { if (isDirty) (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--accent)' }}
               onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border)' }}
             >⌘S</button>
+            
+            {/* TOC Toggle */}
+            <button
+              onClick={onToggleToc}
+              title="Table of Contents"
+              style={{
+                background: showToc ? 'var(--accent-subtle)' : 'var(--bg-tertiary)',
+                border: '1px solid var(--border)',
+                borderRadius: '6px',
+                padding: '5px 8px',
+                fontSize: '14px',
+                color: showToc ? 'var(--accent)' : 'var(--text-muted)',
+                cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.1s',
+              }}
+              onMouseEnter={e => { if (!showToc) (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-hover)' }}
+              onMouseLeave={e => { if (!showToc) (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-tertiary)' }}
+            >
+              ≣
+            </button>
 
             {/* View mode buttons */}
             <div style={{

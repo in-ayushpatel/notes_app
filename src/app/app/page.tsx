@@ -9,6 +9,7 @@ import { CommandPalette } from '@/components/ui/CommandPalette'
 import { Editor } from '@/components/editor/Editor'
 import { Preview } from '@/components/editor/Preview'
 import { TopBar } from '@/components/editor/TopBar'
+import { TocPanel } from '@/components/editor/TocPanel'
 import { EmptyState } from '@/components/ui/EmptyState'
 
 type ViewMode = 'edit' | 'split' | 'preview'
@@ -25,6 +26,7 @@ export default function AppPage() {
 
   const [viewMode, setViewMode] = useState<ViewMode>('edit')
   const [mounted, setMounted] = useState(false)
+  const [showToc, setShowToc] = useState(false)
 
   // ── Sidebar collapse / resize ─────────────────────────────────────────────
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -42,7 +44,11 @@ export default function AppPage() {
     setMounted(true)
     fetchUser()
     restoreRepo()
-  }, [fetchUser, restoreRepo])
+    if (window.innerWidth < 768) {
+      setViewMode('preview')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // ── Global mouse handlers (sidebar drag) ──────────────────────────────────
   const onSidebarMouseMove = useCallback((e: MouseEvent) => {
@@ -180,12 +186,13 @@ export default function AppPage() {
         {/* Global Modal Overlays */}
         <CommandPalette />
 
-        <TopBar viewMode={viewMode} onSetMode={setViewMode} />
+        <TopBar viewMode={viewMode} onSetMode={setViewMode} showToc={showToc} onToggleToc={() => setShowToc(v => !v)} />
 
-        <div
-          ref={splitContainerRef}
-          style={{ flex: 1, overflow: 'hidden', display: 'flex', minHeight: 0, position: 'relative' }}
-        >
+        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', minHeight: 0, position: 'relative' }}>
+          <div
+            ref={splitContainerRef}
+            style={{ flex: 1, overflow: 'hidden', display: 'flex', minHeight: 0, position: 'relative' }}
+          >
           {!openNote ? (
             <EmptyState />
           ) : viewMode === 'split' ? (
@@ -227,6 +234,8 @@ export default function AppPage() {
           ) : (
             <Editor />
           )}
+          </div>
+          <TocPanel showDesktop={showToc} />
         </div>
       </div>
     </div>
