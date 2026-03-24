@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import Fuse from 'fuse.js'
 import { useTreeStore } from '@/store/treeStore'
 import { useEditorStore } from '@/store/editorStore'
+import { useUIStore } from '@/store/uiStore'
 import type { FileNode } from '@/types'
 
 // Recursively flatten tree into a 1D array of only files
@@ -23,7 +24,7 @@ function flattenTree(nodes: FileNode[], pathPrefix = ''): { path: string, name: 
 }
 
 export function CommandPalette() {
-  const [isOpen, setIsOpen] = useState(false)
+  const { isCommandPaletteOpen: isOpen, setCommandPaletteOpen: setIsOpen } = useUIStore()
   const [query, setQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
   

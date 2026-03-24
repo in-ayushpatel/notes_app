@@ -6,13 +6,14 @@ import { useTreeStore } from '@/store/treeStore'
 import { useEditorStore } from '@/store/editorStore'
 import { Sidebar } from '@/components/sidebar/Sidebar'
 import { CommandPalette } from '@/components/ui/CommandPalette'
+import { RichTextEditor } from '@/components/editor/RichTextEditor'
 import { Editor } from '@/components/editor/Editor'
 import { Preview } from '@/components/editor/Preview'
 import { TopBar } from '@/components/editor/TopBar'
 import { TocPanel } from '@/components/editor/TocPanel'
 import { EmptyState } from '@/components/ui/EmptyState'
 
-type ViewMode = 'edit' | 'split' | 'preview'
+type ViewMode = 'edit' | 'rich' | 'split' | 'preview'
 
 const SIDEBAR_DEFAULT = 260
 const SIDEBAR_MIN = 180
@@ -25,6 +26,7 @@ export default function AppPage() {
   const { openNote } = useEditorStore()
 
   const [viewMode, setViewMode] = useState<ViewMode>('edit')
+  const [editorPreference, setEditorPreference] = useState<'edit' | 'rich'>('edit')
   const [mounted, setMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
@@ -39,6 +41,14 @@ export default function AppPage() {
   const [splitRatio, setSplitRatio] = useState(0.5)
   const isDraggingSplit = useRef(false)
   const splitContainerRef = useRef<HTMLDivElement>(null)
+
+  const handleSetViewMode = (mode: ViewMode) => {
+    if (mode === 'edit' || mode === 'rich') {
+      setEditorPreference(mode)
+      if (viewMode === 'split') return
+    }
+    setViewMode(mode)
+  }
 
   useEffect(() => {
     setMounted(true)
@@ -213,7 +223,8 @@ export default function AppPage() {
 
         <TopBar
           viewMode={viewMode}
-          onSetMode={setViewMode}
+          editorPreference={editorPreference}
+          onSetMode={handleSetViewMode}
           sidebarCollapsed={sidebarCollapsed}
           onToggleSidebar={() => setSidebarCollapsed(false)}
           isMobile={isMobile}
@@ -232,8 +243,9 @@ export default function AppPage() {
               <div style={{
                 width: `calc(${splitRatio * 100}% - 2px)`,
                 minWidth: 0, overflow: 'hidden', flexShrink: 0,
+                display: 'flex', flexDirection: 'column'
               }}>
-                <Editor />
+                {editorPreference === 'rich' ? <RichTextEditor /> : <Editor />}
               </div>
 
               {/* Drag handle */}
@@ -262,11 +274,13 @@ export default function AppPage() {
             </>
           ) : viewMode === 'preview' ? (
             <Preview />
+          ) : viewMode === 'rich' ? (
+            <RichTextEditor />
           ) : (
             <Editor />
           )}
           </div>
-          {viewMode !== 'edit' && <TocPanel />}
+          {(viewMode === 'preview' || viewMode === 'split') && <TocPanel />}
         </div>
       </div>
     </div>
