@@ -87,8 +87,9 @@ export function RichTextEditor() {
           .ProseMirror code { background: rgba(99,110,123,0.3); padding: 0.2em 0.4em; border-radius: 6px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; font-size: 0.85em; color: #e6edf3; }
           .ProseMirror pre { background: #1c2128; padding: 1.25em; border-radius: 12px; border: 1px solid var(--border); margin: 1.5em 0; overflow-x: auto; }
           .ProseMirror pre code { background: transparent; padding: 0; border-radius: 0; color: inherit; }
-          .ProseMirror ul, .ProseMirror ol { padding-left: 1.5em; margin: 0 0 1.25em; }
-          .ProseMirror li { margin-bottom: 0.5em; color: #adbac7; line-height: 1.7; }
+          .ProseMirror ul { padding-left: 1.5em; margin: 0 0 1.25em; list-style-type: disc !important; }
+          .ProseMirror ol { padding-left: 1.5em; margin: 0 0 1.25em; list-style-type: decimal !important; }
+          .ProseMirror li { margin-bottom: 0.5em; color: #adbac7; line-height: 1.7; display: list-item !important; }
           .ProseMirror li p { margin: 0; }
           .ProseMirror hr { border: none; border-top: 2px solid var(--border-subtle); margin: 2.5em 0; }
           .ProseMirror a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.1s; }
