@@ -78,7 +78,9 @@ export function RichTextEditor() {
           .ProseMirror blockquote { border-left: 4px solid var(--accent); padding-left: 1em; margin-left: 0; color: var(--text-secondary); }
           .ProseMirror code { background: var(--bg-tertiary); padding: 0.2em 0.4em; border-radius: 6px; font-family: monospace; font-size: 0.9em; }
           .ProseMirror pre { background: var(--bg-secondary); padding: 1em; border-radius: 8px; overflow-x: auto; color: var(--text-primary); font-family: monospace; }
-          .ProseMirror ul, .ProseMirror ol { padding-left: 1.5em; margin-bottom: 1em; }
+          .ProseMirror ul { padding-left: 1.5em; margin-bottom: 1em; list-style-type: disc; }
+          .ProseMirror ol { padding-left: 1.5em; margin-bottom: 1em; list-style-type: decimal; }
+          .ProseMirror li { margin-bottom: 0.3em; }
           .ProseMirror li p { margin: 0; }
           .ProseMirror a { color: var(--accent); text-decoration: none; }
           .ProseMirror a:hover { text-decoration: underline; }
