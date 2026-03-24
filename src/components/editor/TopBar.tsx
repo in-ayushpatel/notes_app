@@ -15,7 +15,7 @@ interface TopBarProps {
 
 const MODES: { mode: ViewMode; icon: string; title: string; color: string }[] = [
   { mode: 'edit',    icon: 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z', title: 'Raw Markdown', color: '#ffa657' },
-  { mode: 'rich',    icon: 'M12 3l1.912 5.813 6.088.031-4.903 3.639 1.859 5.864-4.956-3.567-4.956 3.567 1.859-5.864-4.903-3.639 6.088-.031z', title: 'Rich Editor', color: '#d2a8ff' },
+  { mode: 'rich',    icon: 'M12 3c0 4.5 3.5 8 8 8-4.5 0-8 3.5-8 8 0-4.5-3.5-8-8-8 4.5 0 8-3.5 8-8z', title: 'Rich Editor', color: '#d2a8ff' },
   { mode: 'split',   icon: 'M3 3h18v18H3z M12 3v18', title: 'Side-by-side', color: '#79c0ff' },
   { mode: 'preview', icon: 'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', title: 'Preview only', color: '#56d364' },
 ]
@@ -69,15 +69,22 @@ export function TopBar({ viewMode, onSetMode, sidebarCollapsed, onToggleSidebar,
       )}
 
       {/* Breadcrumb */}
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
         {breadcrumb ? (
-          <div style={{ fontSize: '12px', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            <span style={{ color: 'var(--text-secondary)' }}>{selectedRepo?.fullName}</span>
-            <span style={{ margin: '0 6px' }}>·</span>
+          <div style={{ 
+            fontSize: '12px', color: 'var(--text-muted)', 
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' 
+          }}>
+            {!isMobile && (
+              <>
+                <span style={{ color: 'var(--text-secondary)' }}>{selectedRepo?.fullName}</span>
+                <span style={{ margin: '0 6px' }}>·</span>
+              </>
+            )}
             <span style={{ color: 'var(--text-primary)', fontWeight: '500' }}>{breadcrumb}</span>
           </div>
         ) : (
-          <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {selectedRepo ? `${selectedRepo.fullName} · Select a note` : 'No repo selected'}
           </div>
         )}
@@ -97,20 +104,31 @@ export function TopBar({ viewMode, onSetMode, sidebarCollapsed, onToggleSidebar,
 
         {openNote && (
           <>
-            {/* ⌘S */}
+            {/* Save Button */}
             <button
               onClick={saveNote}
               title="Save (⌘S)"
               disabled={!isDirty}
               style={{
                 background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
-                borderRadius: '6px', padding: '5px 10px', fontSize: '11px',
+                borderRadius: '6px', padding: isMobile ? '5px' : '5px 10px',
+                width: isMobile ? '32px' : 'auto', height: isMobile ? '28px' : 'auto',
+                fontSize: '11px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: isDirty ? 'var(--text-primary)' : 'var(--text-muted)',
                 cursor: isDirty ? 'pointer' : 'default', transition: 'all 0.1s',
               }}
               onMouseEnter={e => { if (isDirty) (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--accent)' }}
               onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border)' }}
-            >⌘S</button>
+            >
+              {isMobile ? (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                  <polyline points="17 21 17 13 7 13 7 21" />
+                  <polyline points="7 3 7 8 15 8" />
+                </svg>
+              ) : '⌘S'}
+            </button>
 
             {/* View mode buttons */}
             <div style={{
