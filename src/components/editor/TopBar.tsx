@@ -13,11 +13,11 @@ interface TopBarProps {
   isMobile: boolean
 }
 
-const MODES: { mode: ViewMode; label: string; title: string }[] = [
-  { mode: 'edit',    label: '✍️',  title: 'Raw Markdown' },
-  { mode: 'rich',    label: '✨',  title: 'Rich Editor' },
-  { mode: 'split',   label: '⬜⬜', title: 'Side-by-side' },
-  { mode: 'preview', label: '👁',  title: 'Preview only' },
+const MODES: { mode: ViewMode; icon: string; title: string }[] = [
+  { mode: 'edit',    icon: 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z', title: 'Raw Markdown' },
+  { mode: 'rich',    icon: 'M12 3l1.912 5.813 6.088.031-4.903 3.639 1.859 5.864-4.956-3.567-4.956 3.567 1.859-5.864-4.903-3.639 6.088-.031z', title: 'Rich Editor' },
+  { mode: 'split',   icon: 'M3 3h18v18H3z M12 3v18', title: 'Side-by-side' },
+  { mode: 'preview', icon: 'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', title: 'Preview only' },
 ]
 
 export function TopBar({ viewMode, onSetMode, sidebarCollapsed, onToggleSidebar, isMobile }: TopBarProps) {
@@ -45,8 +45,8 @@ export function TopBar({ viewMode, onSetMode, sidebarCollapsed, onToggleSidebar,
       display: 'flex', alignItems: 'center',
       padding: '0 16px', gap: '12px',
     }}>
-      {/* Hamburger & App Icon (only when sidebar is collapsed on mobile) */}
-      {sidebarCollapsed && isMobile && (
+      {/* Hamburger & App Icon (only when sidebar is collapsed on mobile or desktop) */}
+      {sidebarCollapsed && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginRight: '6px' }}>
           <button
             onClick={onToggleSidebar}
@@ -91,7 +91,7 @@ export function TopBar({ viewMode, onSetMode, sidebarCollapsed, onToggleSidebar,
             {statusLabel.dot && (
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: statusLabel.color, animation: 'pulse-dot 1s infinite' }} />
             )}
-            {statusLabel.label}
+            {!isMobile && statusLabel.label}
           </div>
         )}
 
@@ -114,10 +114,10 @@ export function TopBar({ viewMode, onSetMode, sidebarCollapsed, onToggleSidebar,
 
             {/* View mode buttons */}
             <div style={{
-              display: 'flex', borderRadius: '7px', overflow: 'hidden',
+              display: 'flex', background: 'var(--bg-tertiary)', padding: '2px', borderRadius: '8px',
               border: '1px solid var(--border)', flexShrink: 0,
             }}>
-              {MODES.filter(m => !isMobile || m.mode !== 'split').map(({ mode, label, title }, i) => {
+              {MODES.filter(m => !isMobile || m.mode !== 'split').map(({ mode, icon, title }, i) => {
                 const active = viewMode === mode
                 return (
                   <button
@@ -125,19 +125,22 @@ export function TopBar({ viewMode, onSetMode, sidebarCollapsed, onToggleSidebar,
                     onClick={() => onSetMode(mode)}
                     title={title}
                     style={{
-                      background: active ? 'var(--accent-subtle)' : 'var(--bg-tertiary)',
-                      border: 'none',
-                      borderLeft: i > 0 ? '1px solid var(--border)' : 'none',
-                      padding: '5px 9px',
-                      fontSize: '12px',
+                      background: active ? 'var(--accent-subtle)' : 'transparent',
+                      border: active ? '1px solid rgba(88,166,255,0.4)' : '1px solid transparent',
+                      borderRadius: '6px',
+                      width: '32px', height: '28px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
                       color: active ? 'var(--accent)' : 'var(--text-muted)',
                       cursor: 'pointer',
-                      transition: 'all 0.1s',
-                      letterSpacing: mode === 'split' ? '2px' : undefined,
+                      transition: 'all 0.15s ease',
                     }}
                     onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-hover)' }}
-                    onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-tertiary)' }}
-                  >{label}</button>
+                    onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d={icon} />
+                    </svg>
+                  </button>
                 )
               })}
             </div>
