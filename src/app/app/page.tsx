@@ -47,6 +47,11 @@ export default function AppPage() {
       setEditorPreference(mode)
       if (viewMode === 'split') return
     }
+    // Toggle split: clicking split again exits it, reverting to last editor preference
+    if (mode === 'split' && viewMode === 'split') {
+      setViewMode(editorPreference)
+      return
+    }
     setViewMode(mode)
   }
 
