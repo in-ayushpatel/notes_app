@@ -26,6 +26,7 @@ export function RichTextEditor() {
       Markdown,
     ],
     content: openNote?.content || '',
+    immediatelyRender: false,
     onUpdate: ({ editor }) => {
       // Serialize rich text into raw markdown
       const markdownOutput = (editor.storage as any).markdown.getMarkdown()
