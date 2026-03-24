@@ -8,7 +8,7 @@ import { useEditorStore } from '@/store/editorStore'
 import { FileTree } from './FileTree'
 import { SearchBox } from './SearchBox'
 
-export function Sidebar({ onToggle, isCollapsed = false }: { onToggle?: () => void, isCollapsed?: boolean }) {
+export function Sidebar({ onToggle }: { onToggle?: () => void }) {
   const { user, logout } = useAuthStore()
   const { tree, selectedRepo, allRepos, isLoadingTree, isLoadingRepos, fetchRepos, selectRepo, refreshTree } = useTreeStore()
   const { openFile } = useEditorStore()
@@ -70,7 +70,9 @@ export function Sidebar({ onToggle, isCollapsed = false }: { onToggle?: () => vo
 
   return (
     <aside style={{
-      width: '100%',
+      width: '260px',
+      minWidth: '220px',
+      maxWidth: '320px',
       flexShrink: 0,
       background: 'var(--bg-secondary)',
       borderRight: '1px solid var(--border)',
@@ -78,66 +80,31 @@ export function Sidebar({ onToggle, isCollapsed = false }: { onToggle?: () => vo
       flexDirection: 'column',
       height: '100%',
       overflow: 'hidden',
-      position: 'relative',
     }}>
-      {/* Mini-toggle for collapsed state */}
+      {/* Header */}
       <div style={{
-        position: 'absolute', top: 0, left: 0, width: '40px', height: '100%',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '14px', gap: '16px',
-        opacity: isCollapsed ? 1 : 0,
-        pointerEvents: isCollapsed ? 'auto' : 'none',
-        transition: 'opacity 0.2s',
-        zIndex: 10,
+        padding: '14px 14px 10px',
+        borderBottom: '1px solid var(--border-subtle)',
+        flexShrink: 0,
       }}>
-        <button
-          onClick={onToggle}
-          title="Expand Sidebar"
-          style={{
-            background: 'transparent', border: 'none', color: 'var(--text-secondary)',
-            cursor: 'pointer', display: 'flex', padding: '4px', borderRadius: '4px',
-          }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
-        <span style={{ fontSize: '16px' }}>🧠</span>
-      </div>
-
-      {/* Main Content (fades out when collapsed) */}
-      <div style={{
-        flex: 1, 
-        display: 'flex', 
-        flexDirection: 'column', 
-        overflow: 'hidden',
-        minWidth: '220px',
-        opacity: isCollapsed ? 0 : 1,
-        transform: isCollapsed ? 'translateX(-20px)' : 'translateX(0)',
-        transition: 'opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-        pointerEvents: isCollapsed ? 'none' : 'auto',
-      }}>
-        {/* Header */}
-        <div style={{
-          padding: '14px 14px 10px',
-          borderBottom: '1px solid var(--border-subtle)',
-          flexShrink: 0,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-            {onToggle && (
-              <button
-                onClick={onToggle}
-                title="Collapse Sidebar"
-                style={{
-                  background: 'transparent', border: 'none', color: 'var(--text-secondary)',
-                  cursor: 'pointer', display: 'flex', padding: '2px', borderRadius: '4px',
-                  transition: 'background 0.1s, color 0.1s'
-                }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-hover)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)' }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)' }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-              </button>
-            )}
-            <span style={{ fontSize: '18px' }}>🧠</span>
-            <span style={{ fontWeight: '700', fontSize: '15px', color: 'var(--text-primary)', flex: 1 }}>vNotes</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+          {onToggle && (
+            <button
+              onClick={onToggle}
+              title="Collapse Sidebar"
+              style={{
+                background: 'transparent', border: 'none', color: 'var(--text-secondary)',
+                cursor: 'pointer', display: 'flex', padding: '2px', borderRadius: '4px',
+                transition: 'background 0.1s, color 0.1s'
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-hover)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)' }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+            </button>
+          )}
+          <span style={{ fontSize: '18px' }}>🧠</span>
+          <span style={{ fontWeight: '700', fontSize: '15px', color: 'var(--text-primary)', flex: 1 }}>vNotes</span>
 
           {/* + New button */}
           {selectedRepo && (
@@ -178,8 +145,8 @@ export function Sidebar({ onToggle, isCollapsed = false }: { onToggle?: () => vo
                       background: 'transparent', border: 'none',
                       color: 'var(--text-primary)', cursor: 'pointer', fontSize: '13px',
                     }}
-                    onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-hover)'}
-                    onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = 'transparent'}
+                      onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-hover)'}
+                      onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = 'transparent'}
                     >{item.label}</button>
                   ))}
                 </div>
@@ -431,7 +398,6 @@ export function Sidebar({ onToggle, isCollapsed = false }: { onToggle?: () => vo
           </div>
         </div>
       )}
-    </div>
-  </aside>
+    </aside>
   )
 }

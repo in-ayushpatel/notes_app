@@ -61,13 +61,13 @@ export default function AppPage() {
     const checkMobile = () => {
       const mobile = window.innerWidth < 768
       setIsMobile(mobile)
-      
+
       if (mobile && !initialMobileCheck.current) {
         setViewMode('preview')
         initialMobileCheck.current = true
       }
     }
-    
+
     checkMobile()
     window.addEventListener('resize', checkMobile)
 
@@ -196,26 +196,55 @@ export default function AppPage() {
       <div className={isIntroFinished ? '' : 'app-reveal'} style={{ display: 'flex', height: '100%', width: '100%', overflow: 'hidden' }}>
 
         {/* ── Sidebar ─────────────────────────────────────────────────────── */}
-        <div 
+        <div
           className={isIntroFinished ? '' : 'sidebar-animated'}
           style={{
             width: sidebarCollapsed ? (isMobile ? '0px' : '40px') : `${sidebarWidth}px`,
             minWidth: sidebarCollapsed ? (isMobile ? '0px' : '40px') : `${sidebarWidth}px`,
             flexShrink: 0,
-            transition: isDraggingSidebar.current ? 'none' : 'width 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+            transition: sidebarCollapsed || isDraggingSidebar.current ? 'none' : 'width 0.2s ease',
             position: 'relative',
             display: 'flex',
             overflow: 'hidden',
           }}
         >
-          <Sidebar 
-            isCollapsed={sidebarCollapsed} 
-            onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
-          />
+          {/* Sidebar content (hidden when collapsed) */}
+          {!sidebarCollapsed && (
+            <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minWidth: '220px' }}>
+              <Sidebar onToggle={() => setSidebarCollapsed(true)} />
+            </div>
+          )}
+
+          {/* Collapsed strip (Desktop only) — shows toggle and brand */}
+          {sidebarCollapsed && !isMobile && (
+            <div style={{
+              width: '40px', height: '100%',
+              background: 'var(--bg-secondary)',
+              borderRight: '1px solid var(--border)',
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', paddingTop: '14px', gap: '16px',
+              flexShrink: 0,
+            }}>
+              <button
+                onClick={() => setSidebarCollapsed(false)}
+                title="Expand Sidebar"
+                style={{
+                  background: 'transparent', border: 'none', color: 'var(--text-secondary)',
+                  cursor: 'pointer', display: 'flex', padding: '4px', borderRadius: '4px',
+                  transition: 'background 0.1s, color 0.1s'
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-hover)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)' }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+              </button>
+              <span style={{ fontSize: '16px' }}>🧠</span>
+            </div>
+          )}
 
 
-          {/* Sidebar drag handle (right edge) — only when expanded on desktop */}
-          {!sidebarCollapsed && !isMobile && (
+          {/* Sidebar drag handle (right edge) — only when expanded */}
+          {!sidebarCollapsed && (
             <div
               onMouseDown={e => {
                 isDraggingSidebar.current = true
@@ -269,7 +298,7 @@ export default function AppPage() {
 
         {/* ── Main content area ────────────────────────────────────────────── */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-          
+
           {/* Global Modal Overlays */}
           <CommandPalette />
 
@@ -287,50 +316,50 @@ export default function AppPage() {
               ref={splitContainerRef}
               style={{ flex: 1, overflow: 'hidden', display: 'flex', minHeight: 0, position: 'relative' }}
             >
-            {!openNote ? (
-              <EmptyState />
-            ) : viewMode === 'split' ? (
-              <>
-                {/* Editor pane */}
-                <div style={{
-                  width: `calc(${splitRatio * 100}% - 2px)`,
-                  minWidth: 0, overflow: 'hidden', flexShrink: 0,
-                  display: 'flex', flexDirection: 'column'
-                }}>
-                  {editorPreference === 'rich' ? <RichTextEditor /> : <Editor />}
-                </div>
+              {!openNote ? (
+                <EmptyState />
+              ) : viewMode === 'split' ? (
+                <>
+                  {/* Editor pane */}
+                  <div style={{
+                    width: `calc(${splitRatio * 100}% - 2px)`,
+                    minWidth: 0, overflow: 'hidden', flexShrink: 0,
+                    display: 'flex', flexDirection: 'column'
+                  }}>
+                    {editorPreference === 'rich' ? <RichTextEditor /> : <Editor />}
+                  </div>
 
-                {/* Drag handle */}
-                <div
-                  onMouseDown={() => {
-                    isDraggingSplit.current = true
-                    document.body.style.cursor = 'col-resize'
-                    document.body.style.userSelect = 'none'
-                  }}
-                  style={{
-                    width: '5px', flexShrink: 0, cursor: 'col-resize',
-                    background: 'var(--border)',
-                    transition: 'background 0.15s',
-                    zIndex: 10,
-                  }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'var(--accent)' }}
-                  onMouseLeave={e => {
-                    if (!isDraggingSplit.current) (e.currentTarget as HTMLDivElement).style.background = 'var(--border)'
-                  }}
-                />
+                  {/* Drag handle */}
+                  <div
+                    onMouseDown={() => {
+                      isDraggingSplit.current = true
+                      document.body.style.cursor = 'col-resize'
+                      document.body.style.userSelect = 'none'
+                    }}
+                    style={{
+                      width: '5px', flexShrink: 0, cursor: 'col-resize',
+                      background: 'var(--border)',
+                      transition: 'background 0.15s',
+                      zIndex: 10,
+                    }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'var(--accent)' }}
+                    onMouseLeave={e => {
+                      if (!isDraggingSplit.current) (e.currentTarget as HTMLDivElement).style.background = 'var(--border)'
+                    }}
+                  />
 
-                {/* Preview pane */}
-                <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                  <Preview />
-                </div>
-              </>
-            ) : viewMode === 'preview' ? (
-              <Preview />
-            ) : viewMode === 'rich' ? (
-              <RichTextEditor />
-            ) : (
-              <Editor />
-            )}
+                  {/* Preview pane */}
+                  <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                    <Preview />
+                  </div>
+                </>
+              ) : viewMode === 'preview' ? (
+                <Preview />
+              ) : viewMode === 'rich' ? (
+                <RichTextEditor />
+              ) : (
+                <Editor />
+              )}
             </div>
             {(viewMode === 'preview' || viewMode === 'split') && <TocPanel />}
           </div>
