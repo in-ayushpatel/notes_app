@@ -14,6 +14,7 @@ export function FileTree({ nodes }: { nodes: FileNode[] }) {
   const [newName, setNewName] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [nodeToDelete, setNodeToDelete] = useState<FileNode | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const { openFile, openNote } = useEditorStore()
   const { refreshTree } = useTreeStore()
@@ -69,9 +70,15 @@ export function FileTree({ nodes }: { nodes: FileNode[] }) {
     }
   }
 
-  const handleDelete = async (e: React.MouseEvent, node: FileNode) => {
+  const openDeleteModal = (e: React.MouseEvent, node: FileNode) => {
     e.stopPropagation()
-    if (!window.confirm(`Delete "${node.name}"?`)) return
+    setNodeToDelete(node)
+  }
+
+  const confirmDeleteAction = async () => {
+    if (!nodeToDelete) return
+    const node = nodeToDelete
+    setNodeToDelete(null)
     setDeleting(node.path)
     try {
       if (node.type === 'file') {
@@ -259,7 +266,7 @@ export function FileTree({ nodes }: { nodes: FileNode[] }) {
               {/* Delete */}
               <button
                 title="Delete"
-                onClick={e => handleDelete(e, node)}
+                onClick={e => openDeleteModal(e, node)}
                 style={btnStyle('#6e7681')}
                 onMouseEnter={e => hoverIn(e, '#f85149', true)}
                 onMouseLeave={e => hoverOut(e, '#6e7681')}
@@ -318,7 +325,62 @@ export function FileTree({ nodes }: { nodes: FileNode[] }) {
   }
 
   return (
-    <div style={{ padding: '4px 0' }}>
+    <>
+      {/* Custom Delete Confirmation Modal */}
+      {nodeToDelete && (
+        <div
+          onClick={() => setNodeToDelete(null)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+              borderRadius: '12px', padding: '24px', width: '320px',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+              display: 'flex', flexDirection: 'column', gap: '16px',
+              animation: 'slideUp 0.15s ease-out'
+            }}
+          >
+            <div style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text-primary)' }}>
+              Delete {nodeToDelete.type === 'folder' ? 'Folder' : 'Note'}
+            </div>
+            <div style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: '1.5' }}>
+              Are you sure you want to delete <strong style={{ color: 'var(--text-primary)' }}>{nodeToDelete.name.replace(/\.md$/, '')}</strong>?
+              <br/><br/>
+              This action operates directly on GitHub and cannot be undone.
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '8px' }}>
+              <button
+                onClick={() => setNodeToDelete(null)}
+                style={{
+                  background: 'transparent', border: '1px solid var(--border)',
+                  color: 'var(--text-primary)', padding: '6px 16px', borderRadius: '6px',
+                  fontSize: '13px', cursor: 'pointer', transition: 'background 0.1s'
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-hover)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+              >Cancel</button>
+              <button
+                onClick={confirmDeleteAction}
+                style={{
+                  background: 'var(--danger)', border: 'none',
+                  color: '#fff', padding: '6px 16px', borderRadius: '6px',
+                  fontSize: '13px', cursor: 'pointer', fontWeight: '500', transition: 'background 0.1s'
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.9' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '1' }}
+              >Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div style={{ padding: '4px 0' }}>
       {nodes.length === 0 ? (
         <div style={{
           padding: '24px 16px', textAlign: 'center',
@@ -332,7 +394,8 @@ export function FileTree({ nodes }: { nodes: FileNode[] }) {
       ) : (
         nodes.map(node => renderNode(node))
       )}
-    </div>
+      </div>
+    </>
   )
 }
 
