@@ -7,6 +7,7 @@ type ViewMode = 'edit' | 'rich' | 'split' | 'preview'
 
 interface TopBarProps {
   viewMode: ViewMode
+  editorPreference: 'edit' | 'rich'
   onSetMode: (m: ViewMode) => void
   sidebarCollapsed: boolean
   onToggleSidebar: () => void
@@ -20,7 +21,7 @@ const MODES: { mode: ViewMode; icon: string; title: string; color: string }[] = 
   { mode: 'preview', icon: 'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', title: 'Preview only', color: '#56d364' },
 ]
 
-export function TopBar({ viewMode, onSetMode, sidebarCollapsed, onToggleSidebar, isMobile }: TopBarProps) {
+export function TopBar({ viewMode, editorPreference, onSetMode, sidebarCollapsed, onToggleSidebar, isMobile }: TopBarProps) {
   const { openNote, saveStatus, saveNote, isDirty } = useEditorStore()
   const { selectedRepo } = useTreeStore()
 
@@ -136,7 +137,7 @@ export function TopBar({ viewMode, onSetMode, sidebarCollapsed, onToggleSidebar,
               border: '1px solid var(--border)', flexShrink: 0,
             }}>
               {MODES.filter(m => !isMobile || m.mode !== 'split').map(({ mode, icon, title, color }, i) => {
-                const active = viewMode === mode
+                const active = viewMode === mode || (viewMode === 'split' && (mode === 'edit' || mode === 'rich') && editorPreference === mode)
                 return (
                   <button
                     key={mode}
