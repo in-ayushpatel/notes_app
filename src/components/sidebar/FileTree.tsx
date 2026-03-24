@@ -9,6 +9,7 @@ import { useSearchStore } from '@/store/searchStore'
 export function FileTree({ nodes }: { nodes: FileNode[] }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [hoveredPath, setHoveredPath] = useState<string | null>(null)
+  const [dragOverPath, setDragOverPath] = useState<string | null>(null)
   const [creating, setCreating] = useState<{ parentPath: string; type: 'file' | 'folder' } | null>(null)
   const [newName, setNewName] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -114,11 +115,63 @@ export function FileTree({ nodes }: { nodes: FileNode[] }) {
             margin: '1px 4px',
             fontSize: '13px',
             color: isOpen ? 'var(--accent)' : 'var(--text-secondary)',
-            background: isOpen ? 'var(--accent-subtle)' : isHovered ? 'var(--bg-hover)' : 'transparent',
+            background: dragOverPath === node.path ? 'rgba(88,166,255,0.2)' : isOpen ? 'var(--accent-subtle)' : isHovered ? 'var(--bg-hover)' : 'transparent',
             opacity: isDeletingThis ? 0.4 : 1,
             transition: 'background 0.1s',
             userSelect: 'none',
             position: 'relative',
+          }}
+          draggable
+          onDragStart={(e) => {
+            e.dataTransfer.setData('app/node', JSON.stringify({ path: node.path, type: node.type, sha: node.sha }))
+            e.dataTransfer.effectAllowed = 'move'
+          }}
+          onDragOver={(e) => {
+            if (isFolder) {
+              e.preventDefault()
+              e.dataTransfer.dropEffect = 'move'
+              setDragOverPath(node.path)
+            }
+          }}
+          onDragLeave={() => {
+            if (dragOverPath === node.path) setDragOverPath(null)
+          }}
+          onDrop={async (e) => {
+            if (!isFolder) return
+            e.preventDefault()
+            setDragOverPath(null)
+            const data = e.dataTransfer.getData('app/node')
+            if (!data) return
+            
+            try {
+              const { path: oldPath, type, sha } = JSON.parse(data)
+              const incomingName = oldPath.split('/').pop()!
+              const newPath = `${node.path}/${incomingName}`
+              
+              if (oldPath === newPath) return // Same spot
+              if (node.path.startsWith(oldPath)) return // Can't drop a folder into itself
+              
+              // Optimistic update
+              const treeState = useTreeStore.getState()
+              treeState.moveNode(oldPath, newPath)
+              
+              // Backend update
+              const res = await fetch('/api/file/move', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldPath, newPath, type, sha })
+              })
+              
+              if (!res.ok) throw new Error('Move failed on server')
+
+              // Soft refresh to secure actual SHAs post-mutation
+              treeState.refreshTree()
+              
+            } catch (err) {
+              console.error('Drag drop failed', err)
+              // Hard refresh to revert optimistic update
+              useTreeStore.getState().fetchTree()
+            }
           }}
           onClick={() => {
             if (isFolder) {

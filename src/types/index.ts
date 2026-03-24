@@ -4,6 +4,7 @@ export interface FileNode {
   name: string
   path: string
   type: FileNodeType
+  sha: string
   children?: FileNode[]
 }
 

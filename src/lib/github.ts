@@ -75,13 +75,13 @@ export async function getRepoTree(
   const treeData = await treeRes.json()
 
   // Filter to only notes/ directory and build nested structure
-  const items = (treeData.tree as Array<{ path: string; type: string }>)
+  const items = (treeData.tree as Array<{ path: string; type: string; sha: string }>)
     .filter((item) => item.path.startsWith('notes/') && (item.type === 'blob' ? item.path.endsWith('.md') : true))
 
   return buildTree(items)
 }
 
-function buildTree(items: Array<{ path: string; type: string }>): FileNode[] {
+function buildTree(items: Array<{ path: string; type: string; sha: string }>): FileNode[] {
   const root: FileNode[] = []
   const nodeMap = new Map<string, FileNode>()
 
@@ -102,6 +102,7 @@ function buildTree(items: Array<{ path: string; type: string }>): FileNode[] {
       name,
       path: item.path,
       type: item.type === 'tree' ? 'folder' : 'file',
+      sha: item.sha,
       children: item.type === 'tree' ? [] : undefined,
     }
 
@@ -230,4 +231,74 @@ export async function getImageDownloadUrl(
   const data = await res.json()
   if (!data.download_url) throw new Error('No download URL available')
   return data.download_url
+}
+
+export async function moveFileOrFolder(
+  token: string,
+  owner: string,
+  repo: string,
+  oldPath: string,
+  newPath: string,
+  type: 'file' | 'folder',
+  sha: string
+): Promise<void> {
+  // 1. Get branch ref
+  const refRes = await githubFetch(`/repos/${owner}/${repo}/git/refs/heads/main`, token)
+  if (!refRes.ok) throw new Error('Failed to get branch ref')
+  const refData = await refRes.json()
+  const currentCommitSha = refData.object.sha
+
+  // 2. Get the current commit for its tree SHA
+  const commitRes = await githubFetch(`/repos/${owner}/${repo}/git/commits/${currentCommitSha}`, token)
+  if (!commitRes.ok) throw new Error('Failed to get current commit')
+  const commitData = await commitRes.json()
+  const baseTreeSha = commitData.tree.sha
+
+  // 3. Post a new tree with the moved nodes (null sha deletes from the tree)
+  const treePayload = {
+    base_tree: baseTreeSha,
+    tree: [
+      {
+        path: newPath,
+        mode: type === 'folder' ? '040000' : '100644',
+        type: type === 'folder' ? 'tree' : 'blob',
+        sha: sha
+      },
+      {
+        path: oldPath,
+        mode: type === 'folder' ? '040000' : '100644',
+        type: type === 'folder' ? 'tree' : 'blob',
+        sha: null
+      }
+    ]
+  }
+
+  const treeRes = await githubFetch(`/repos/${owner}/${repo}/git/trees`, token, {
+    method: 'POST',
+    body: JSON.stringify(treePayload)
+  })
+  if (!treeRes.ok) throw new Error('Failed to create new tree')
+  const treeData2 = await treeRes.json()
+  const newTreeSha = treeData2.sha
+
+  // 4. Create new commit pointing to the new tree
+  const commitPayload = {
+    message: `Move ${oldPath} to ${newPath}`,
+    tree: newTreeSha,
+    parents: [currentCommitSha]
+  }
+  const newCommitRes = await githubFetch(`/repos/${owner}/${repo}/git/commits`, token, {
+    method: 'POST',
+    body: JSON.stringify(commitPayload)
+  })
+  if (!newCommitRes.ok) throw new Error('Failed to create commit')
+  const newCommitData = await newCommitRes.json()
+  const newCommitSha = newCommitData.sha
+
+  // 5. Update branch pointer
+  const updateRefRes = await githubFetch(`/repos/${owner}/${repo}/git/refs/heads/main`, token, {
+    method: 'PATCH',
+    body: JSON.stringify({ sha: newCommitSha })
+  })
+  if (!updateRefRes.ok) throw new Error('Failed to update branch ref')
 }

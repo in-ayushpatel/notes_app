@@ -20,6 +20,7 @@ interface TreeState {
   fetchTree: () => Promise<void>
   refreshTree: () => Promise<void>
   restoreRepo: () => Promise<void>
+  moveNode: (oldPath: string, newPath: string) => void
 }
 
 export const useTreeStore = create<TreeState>((set, get) => ({
@@ -102,5 +103,73 @@ export const useTreeStore = create<TreeState>((set, get) => ({
     } catch {
       /* ignore refresh errors silently */
     }
+  },
+
+  moveNode: (oldPath: string, newPath: string) => {
+    set(state => {
+      const newTree = JSON.parse(JSON.stringify(state.tree)) as FileNode[]
+
+      const removeFromTree = (nodes: FileNode[]): FileNode | null => {
+        for (let i = 0; i < nodes.length; i++) {
+          if (nodes[i].path === oldPath) {
+            return nodes.splice(i, 1)[0]
+          }
+          if (nodes[i].children) {
+            const found = removeFromTree(nodes[i].children!)
+            if (found) return found
+          }
+        }
+        return null
+      }
+      const nodeToMove = removeFromTree(newTree)
+
+      if (!nodeToMove) return state // Should not happen
+
+      nodeToMove.path = newPath
+      nodeToMove.name = newPath.split('/').pop()!
+
+      const updateChildrenPaths = (node: FileNode, basePath: string) => {
+        if (node.children) {
+          node.children.forEach(child => {
+            child.path = `${basePath}/${child.name}`
+            updateChildrenPaths(child, child.path)
+          })
+        }
+      }
+      updateChildrenPaths(nodeToMove, nodeToMove.path)
+
+      const pathParts = newPath.split('/')
+      const parentPath = pathParts.slice(0, pathParts.length - 1).join('/')
+
+      if (parentPath === 'notes') {
+        newTree.push(nodeToMove)
+      } else {
+        const addToTree = (nodes: FileNode[]) => {
+          for (const n of nodes) {
+            if (n.path === parentPath) {
+              if (!n.children) n.children = []
+              n.children.push(nodeToMove!)
+              return true
+            }
+            if (n.children && addToTree(n.children)) return true
+          }
+          return false
+        }
+        addToTree(newTree)
+      }
+
+      const sortTree = (nodes: FileNode[]) => {
+        nodes.sort((a, b) => {
+          if (a.type !== b.type) return a.type === 'folder' ? -1 : 1
+          return a.name.localeCompare(b.name)
+        })
+        nodes.forEach(n => {
+          if (n.children) sortTree(n.children)
+        })
+      }
+      sortTree(newTree)
+
+      return { tree: newTree }
+    })
   },
 }))
