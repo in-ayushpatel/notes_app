@@ -8,6 +8,8 @@ type ViewMode = 'edit' | 'split' | 'preview'
 interface TopBarProps {
   viewMode: ViewMode
   onSetMode: (m: ViewMode) => void
+  sidebarCollapsed: boolean
+  onToggleSidebar: () => void
 }
 
 const MODES: { mode: ViewMode; label: string; title: string }[] = [
@@ -16,7 +18,7 @@ const MODES: { mode: ViewMode; label: string; title: string }[] = [
   { mode: 'preview', label: '👁',  title: 'Preview only' },
 ]
 
-export function TopBar({ viewMode, onSetMode }: TopBarProps) {
+export function TopBar({ viewMode, onSetMode, sidebarCollapsed, onToggleSidebar }: TopBarProps) {
   const { openNote, saveStatus, saveNote, isDirty } = useEditorStore()
   const { selectedRepo } = useTreeStore()
 
@@ -41,6 +43,29 @@ export function TopBar({ viewMode, onSetMode }: TopBarProps) {
       display: 'flex', alignItems: 'center',
       padding: '0 16px', gap: '12px',
     }}>
+      {/* Hamburger & App Icon (only when sidebar is collapsed) */}
+      {sidebarCollapsed && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginRight: '6px' }}>
+          <button
+            onClick={onToggleSidebar}
+            title="Expand Sidebar"
+            style={{
+              background: 'transparent', border: 'none', color: 'var(--text-secondary)',
+              cursor: 'pointer', display: 'flex', padding: '4px', borderRadius: '4px',
+              transition: 'background 0.1s, color 0.1s'
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-hover)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)' }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginRight: '8px' }}>
+            <span style={{ fontSize: '18px' }}>🧠</span>
+            <span style={{ fontWeight: '700', fontSize: '15px', color: 'var(--text-primary)' }}>DevNotes</span>
+          </div>
+        </div>
+      )}
+
       {/* Breadcrumb */}
       <div style={{ flex: 1, minWidth: 0 }}>
         {breadcrumb ? (

@@ -8,7 +8,7 @@ import { useEditorStore } from '@/store/editorStore'
 import { FileTree } from './FileTree'
 import { SearchBox } from './SearchBox'
 
-export function Sidebar() {
+export function Sidebar({ onToggle }: { onToggle?: () => void }) {
   const { user, logout } = useAuthStore()
   const { tree, selectedRepo, allRepos, isLoadingTree, isLoadingRepos, fetchRepos, selectRepo, refreshTree } = useTreeStore()
   const { openFile } = useEditorStore()
@@ -88,6 +88,21 @@ export function Sidebar() {
         flexShrink: 0,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+          {onToggle && (
+            <button
+              onClick={onToggle}
+              title="Collapse Sidebar"
+              style={{
+                background: 'transparent', border: 'none', color: 'var(--text-secondary)',
+                cursor: 'pointer', display: 'flex', padding: '2px', borderRadius: '4px',
+                transition: 'background 0.1s, color 0.1s'
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-hover)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)' }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+          )}
           <span style={{ fontSize: '18px' }}>🧠</span>
           <span style={{ fontWeight: '700', fontSize: '15px', color: 'var(--text-primary)', flex: 1 }}>DevNotes</span>
 

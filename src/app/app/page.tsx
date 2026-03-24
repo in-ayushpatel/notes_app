@@ -101,8 +101,8 @@ export default function AppPage() {
 
       {/* ── Sidebar ─────────────────────────────────────────────────────── */}
       <div style={{
-        width: sidebarCollapsed ? '40px' : `${sidebarWidth}px`,
-        minWidth: sidebarCollapsed ? '40px' : `${sidebarWidth}px`,
+        width: sidebarCollapsed ? '0px' : `${sidebarWidth}px`,
+        minWidth: sidebarCollapsed ? '0px' : `${sidebarWidth}px`,
         flexShrink: 0,
         transition: sidebarCollapsed || isDraggingSidebar.current ? 'none' : 'width 0.2s ease',
         position: 'relative',
@@ -111,23 +111,11 @@ export default function AppPage() {
       }}>
         {/* Sidebar content (hidden when collapsed) */}
         {!sidebarCollapsed && (
-          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <Sidebar />
+          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minWidth: '220px' }}>
+            <Sidebar onToggle={() => setSidebarCollapsed(true)} />
           </div>
         )}
 
-        {/* Collapsed strip — shows toggle only */}
-        {sidebarCollapsed && (
-          <div style={{
-            width: '40px', height: '100%',
-            background: 'var(--bg-secondary)',
-            borderRight: '1px solid var(--border)',
-            display: 'flex', flexDirection: 'column',
-            alignItems: 'center', paddingTop: '14px', gap: '16px',
-          }}>
-            <span style={{ fontSize: '16px' }}>🧠</span>
-          </div>
-        )}
 
         {/* Sidebar drag handle (right edge) — only when expanded */}
         {!sidebarCollapsed && (
@@ -153,31 +141,34 @@ export default function AppPage() {
       </div>
 
       {/* ── Sidebar collapse / expand toggle ────────────────────────────── */}
-      <button
-        onClick={() => setSidebarCollapsed(v => !v)}
-        title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        style={{
-          position: 'absolute',
-          left: sidebarCollapsed ? '28px' : `${sidebarWidth - 12}px`,
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 20,
-          width: '20px', height: '44px',
-          background: 'var(--bg-tertiary)',
-          border: '1px solid var(--border)',
-          borderRadius: '0 6px 6px 0',
-          cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: 'var(--text-muted)',
-          fontSize: '10px',
-          transition: 'left 0.2s ease, color 0.1s',
-          padding: 0,
-        }}
-        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--accent)' }}
-        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)' }}
-      >
-        {sidebarCollapsed ? '▶' : '◀'}
-      </button>
+      {!sidebarCollapsed && (
+        <button
+          onClick={() => setSidebarCollapsed(true)}
+          title="Collapse sidebar"
+          style={{
+            position: 'absolute',
+            left: `${sidebarWidth - 12}px`,
+            top: '24px',
+            transform: 'translateY(0)',
+            zIndex: 20,
+            width: '24px', height: '28px',
+            background: 'var(--bg-tertiary)',
+            border: '1px solid var(--border)',
+            borderLeft: 'none',
+            borderRadius: '0 6px 6px 0',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--text-muted)',
+            fontSize: '11px',
+            transition: 'left 0.2s ease, color 0.1s',
+            padding: 0,
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--accent)' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)' }}
+        >
+          ◀
+        </button>
+      )}
 
       {/* ── Main content area ────────────────────────────────────────────── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
@@ -185,7 +176,12 @@ export default function AppPage() {
         {/* Global Modal Overlays */}
         <CommandPalette />
 
-        <TopBar viewMode={viewMode} onSetMode={setViewMode} />
+        <TopBar
+          viewMode={viewMode}
+          onSetMode={setViewMode}
+          sidebarCollapsed={sidebarCollapsed}
+          onToggleSidebar={() => setSidebarCollapsed(false)}
+        />
 
         <div style={{ flex: 1, overflow: 'hidden', display: 'flex', minHeight: 0, position: 'relative' }}>
           <div
