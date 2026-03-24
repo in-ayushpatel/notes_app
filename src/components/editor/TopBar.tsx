@@ -117,7 +117,7 @@ export function TopBar({ viewMode, onSetMode, sidebarCollapsed, onToggleSidebar,
               display: 'flex', borderRadius: '7px', overflow: 'hidden',
               border: '1px solid var(--border)', flexShrink: 0,
             }}>
-              {MODES.map(({ mode, label, title }, i) => {
+              {MODES.filter(m => !isMobile || m.mode !== 'split').map(({ mode, label, title }, i) => {
                 const active = viewMode === mode
                 return (
                   <button
