@@ -234,7 +234,7 @@ export default function AppPage() {
             <Editor />
           )}
           </div>
-          <TocPanel />
+          {viewMode !== 'edit' && <TocPanel />}
         </div>
       </div>
     </div>
