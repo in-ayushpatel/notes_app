@@ -29,12 +29,18 @@ export function Toolbar({ editor }: { editor: Editor | null }) {
   }
 
   return (
-    <div style={{
-      display: 'flex', gap: '4px', padding: '8px 12px',
+    <div className="toolbar-container" style={{
+      display: 'flex', gap: '8px', padding: '10px 16px',
       borderBottom: '1px solid var(--border)', background: 'var(--bg-secondary)',
-      flexWrap: 'wrap', alignItems: 'center', flexShrink: 0
+      overflowX: 'auto', alignItems: 'center', flexShrink: 0,
+      scrollbarWidth: 'none', // Firefox
+      msOverflowStyle: 'none', // IE/Edge
     }}>
-      <div style={{ display: 'flex', gap: '2px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+      <style>{`
+        .toolbar-container::-webkit-scrollbar { display: none; }
+      `}</style>
+      
+      <div style={{ display: 'flex', gap: '2px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)', flexShrink: 0 }}>
         <button
           onClick={() => editor.chain().focus().toggleBold().run()}
           style={btnStyle(editor.isActive('bold'), colors.style)}
@@ -58,7 +64,7 @@ export function Toolbar({ editor }: { editor: Editor | null }) {
         </button>
       </div>
       
-      <div style={{ display: 'flex', gap: '2px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+      <div style={{ display: 'flex', gap: '2px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)', flexShrink: 0 }}>
         <button
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
           style={btnStyle(editor.isActive('heading', { level: 1 }), colors.heading)}
@@ -76,7 +82,7 @@ export function Toolbar({ editor }: { editor: Editor | null }) {
         ><span style={{ fontWeight: '800', fontSize: '11px' }}>H3</span></button>
       </div>
       
-      <div style={{ display: 'flex', gap: '2px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+      <div style={{ display: 'flex', gap: '2px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)', flexShrink: 0 }}>
         <button
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           style={btnStyle(editor.isActive('bulletList'), colors.list)}
@@ -93,7 +99,7 @@ export function Toolbar({ editor }: { editor: Editor | null }) {
         </button>
       </div>
       
-      <div style={{ display: 'flex', gap: '2px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+      <div style={{ display: 'flex', gap: '2px', background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)', flexShrink: 0 }}>
         <button
           onClick={() => editor.chain().focus().toggleCodeBlock().run()}
           style={btnStyle(editor.isActive('codeBlock'), colors.block)}
