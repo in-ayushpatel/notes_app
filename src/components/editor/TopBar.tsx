@@ -10,6 +10,7 @@ interface TopBarProps {
   onSetMode: (m: ViewMode) => void
   sidebarCollapsed: boolean
   onToggleSidebar: () => void
+  isMobile: boolean
 }
 
 const MODES: { mode: ViewMode; label: string; title: string }[] = [
@@ -18,7 +19,7 @@ const MODES: { mode: ViewMode; label: string; title: string }[] = [
   { mode: 'preview', label: '👁',  title: 'Preview only' },
 ]
 
-export function TopBar({ viewMode, onSetMode, sidebarCollapsed, onToggleSidebar }: TopBarProps) {
+export function TopBar({ viewMode, onSetMode, sidebarCollapsed, onToggleSidebar, isMobile }: TopBarProps) {
   const { openNote, saveStatus, saveNote, isDirty } = useEditorStore()
   const { selectedRepo } = useTreeStore()
 
@@ -43,8 +44,8 @@ export function TopBar({ viewMode, onSetMode, sidebarCollapsed, onToggleSidebar 
       display: 'flex', alignItems: 'center',
       padding: '0 16px', gap: '12px',
     }}>
-      {/* Hamburger & App Icon (only when sidebar is collapsed) */}
-      {sidebarCollapsed && (
+      {/* Hamburger & App Icon (only when sidebar is collapsed on mobile) */}
+      {sidebarCollapsed && isMobile && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginRight: '6px' }}>
           <button
             onClick={onToggleSidebar}

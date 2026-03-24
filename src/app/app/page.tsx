@@ -26,6 +26,7 @@ export default function AppPage() {
 
   const [viewMode, setViewMode] = useState<ViewMode>('edit')
   const [mounted, setMounted] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   // ── Sidebar collapse / resize ─────────────────────────────────────────────
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -43,9 +44,16 @@ export default function AppPage() {
     setMounted(true)
     fetchUser()
     restoreRepo()
-    if (window.innerWidth < 768) {
-      setViewMode('preview')
+
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768
+      setIsMobile(mobile)
+      if (mobile) setViewMode('preview')
     }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -101,8 +109,8 @@ export default function AppPage() {
 
       {/* ── Sidebar ─────────────────────────────────────────────────────── */}
       <div style={{
-        width: sidebarCollapsed ? '0px' : `${sidebarWidth}px`,
-        minWidth: sidebarCollapsed ? '0px' : `${sidebarWidth}px`,
+        width: sidebarCollapsed ? (isMobile ? '0px' : '40px') : `${sidebarWidth}px`,
+        minWidth: sidebarCollapsed ? (isMobile ? '0px' : '40px') : `${sidebarWidth}px`,
         flexShrink: 0,
         transition: sidebarCollapsed || isDraggingSidebar.current ? 'none' : 'width 0.2s ease',
         position: 'relative',
@@ -113,6 +121,33 @@ export default function AppPage() {
         {!sidebarCollapsed && (
           <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minWidth: '220px' }}>
             <Sidebar onToggle={() => setSidebarCollapsed(true)} />
+          </div>
+        )}
+
+        {/* Collapsed strip (Desktop only) — shows toggle and brand */}
+        {sidebarCollapsed && !isMobile && (
+          <div style={{
+            width: '40px', height: '100%',
+            background: 'var(--bg-secondary)',
+            borderRight: '1px solid var(--border)',
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', paddingTop: '14px', gap: '16px',
+            flexShrink: 0,
+          }}>
+            <button
+              onClick={() => setSidebarCollapsed(false)}
+              title="Expand Sidebar"
+              style={{
+                background: 'transparent', border: 'none', color: 'var(--text-secondary)',
+                cursor: 'pointer', display: 'flex', padding: '4px', borderRadius: '4px',
+                transition: 'background 0.1s, color 0.1s'
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-hover)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)' }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <span style={{ fontSize: '16px' }}>🧠</span>
           </div>
         )}
 
@@ -148,20 +183,20 @@ export default function AppPage() {
           style={{
             position: 'absolute',
             left: `${sidebarWidth - 12}px`,
-            top: '24px',
+            top: '48px',
             transform: 'translateY(0)',
             zIndex: 20,
             width: '24px', height: '28px',
             background: 'var(--bg-tertiary)',
             border: '1px solid var(--border)',
-            borderLeft: 'none',
-            borderRadius: '0 6px 6px 0',
+            borderRadius: '6px',
             cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: 'var(--text-muted)',
             fontSize: '11px',
             transition: 'left 0.2s ease, color 0.1s',
             padding: 0,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
           }}
           onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--accent)' }}
           onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)' }}
@@ -181,6 +216,7 @@ export default function AppPage() {
           onSetMode={setViewMode}
           sidebarCollapsed={sidebarCollapsed}
           onToggleSidebar={() => setSidebarCollapsed(false)}
+          isMobile={isMobile}
         />
 
         <div style={{ flex: 1, overflow: 'hidden', display: 'flex', minHeight: 0, position: 'relative' }}>
