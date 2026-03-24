@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import Image from '@tiptap/extension-image'
 import { Markdown } from 'tiptap-markdown'
 import { useEditorStore } from '@/store/editorStore'
 import { Toolbar } from './Toolbar'
@@ -20,16 +21,52 @@ export function RichTextEditor() {
     }, 3000)
   }, [saveNote])
 
+  const handleImageUpload = async (file: File, view: any, pos: number) => {
+    if (!file.type.startsWith('image/')) return false
+    
+    // Create a temporary placeholder (optional, but good for UX)
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      if (!res.ok) throw new Error('Upload failed')
+      const { url } = await res.json()
+      
+      // url is .images/filename.png
+      // Prepend /api/image?path= for immediate preview in editor
+      const finalUrl = `/api/image?path=${url}`
+      
+      view.dispatch(
+        view.state.tr.insert(pos, view.state.schema.nodes.image.create({ src: finalUrl, alt: file.name }))
+      )
+    } catch (err) {
+      console.error('Image upload failed:', err)
+      alert('Failed to upload image')
+    }
+    return true
+  }
+
   const editor = useEditor({
     extensions: [
       StarterKit,
       Markdown,
+      Image.configure({
+        HTMLAttributes: {
+          class: 'rounded-lg shadow-sm max-w-full my-4',
+        },
+      }),
     ],
     content: openNote?.content || '',
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
       // Serialize rich text into raw markdown
-      const markdownOutput = (editor.storage as any).markdown.getMarkdown()
+      let markdownOutput = (editor.storage as any).markdown.getMarkdown()
+      
+      // Post-process: strip internal API path back to relative path for GitHub
+      // Replaces /api/image?path=.images/... with .images/...
+      markdownOutput = markdownOutput.replace(/\/api\/image\?path=/g, '')
+      
       setContent(markdownOutput)
       debouncedSave()
     },
@@ -37,15 +74,57 @@ export function RichTextEditor() {
       attributes: {
         class: 'prose-container focus:outline-none min-h-full',
       },
+      handleDOMEvents: {
+        paste: (view, event) => {
+          const items = event.clipboardData?.items
+          if (!items) return false
+
+          for (const item of Array.from(items)) {
+            if (item.type.startsWith('image/')) {
+              const file = item.getAsFile()
+              if (file) {
+                event.preventDefault()
+                handleImageUpload(file, view, view.state.selection.from)
+                return true
+              }
+            }
+          }
+          return false
+        },
+        drop: (view, event) => {
+          const files = event.dataTransfer?.files
+          if (!files || files.length === 0) return false
+
+          const file = files[0]
+          if (file.type.startsWith('image/')) {
+            event.preventDefault()
+            const pos = view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos
+            if (pos !== undefined) {
+              handleImageUpload(file, view, pos)
+              return true
+            }
+          }
+          return false
+        },
+      },
     },
   })
 
   // Watch for external file changes (e.g. clicking a different file in the sidebar)
   useEffect(() => {
-    if (editor && openNote && openNote.content !== (editor.storage as any).markdown.getMarkdown()) {
-      editor.commands.setContent(openNote.content)
+    if (editor && openNote) {
+      const currentMarkdown = (editor.storage as any).markdown.getMarkdown().replace(/\/api\/image\?path=/g, '')
+      if (openNote.content !== currentMarkdown) {
+        // Rewrites relative paths (./.images, .images, notes/.images) to absolute API paths for the editor
+        // We look for patterns like ![](.images/...) or ![](./.images/...) or ![](notes/.images/...)
+        const displayContent = openNote.content.replace(
+          /!\[(.*?)\]\((?:\.\/|notes\/)?(\.images\/.*?)\)/g, 
+          '![$1](/api/image?path=$2)'
+        )
+        editor.commands.setContent(displayContent)
+      }
     }
-  }, [openNote?.path]) // Only update when path changes
+  }, [openNote?.path, editor]) // Only update when path changes or editor mounts
 
   // Keyboard shortcut to manually save
   useEffect(() => {
