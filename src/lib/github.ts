@@ -226,11 +226,22 @@ export async function getImageDownloadUrl(
   repo: string,
   path: string
 ): Promise<string> {
-  const res = await githubFetch(`/repos/${owner}/${repo}/contents/${path}`, token)
-  if (!res.ok) throw new Error('Failed to fetch image metadata')
-  const data = await res.json()
-  if (!data.download_url) throw new Error('No download URL available')
-  return data.download_url
+  try {
+    // Encode path segments to handle special characters/spaces
+    const encodedPath = path.split('/').map(encodeURIComponent).join('/')
+    const res = await githubFetch(`/repos/${owner}/${repo}/contents/${encodedPath}`, token)
+    if (!res.ok) {
+      const err = await res.json()
+      console.error(`[github] getImageDownloadUrl failed for ${path}:`, res.status, err)
+      throw new Error(`Failed to fetch image metadata: ${res.status} ${err.message || ''}`)
+    }
+    const data = await res.json()
+    if (!data.download_url) throw new Error('No download URL available')
+    return data.download_url
+  } catch (err) {
+    console.error(`[github] getImageDownloadUrl error for ${path}:`, err)
+    throw err
+  }
 }
 
 export async function moveFileOrFolder(

@@ -21,6 +21,14 @@ export function RichTextEditor() {
     }, 3000)
   }, [saveNote])
 
+  // Helper to rewrite relative paths (./.images, .images, notes/.images) to absolute API paths for the editor
+  const rewriteMarkdownToApiPaths = useCallback((content: string) => {
+    return content.replace(
+      /!\[(.*?)\]\((?:\.\/|notes\/)?(\.images\/.*?)\)/g, 
+      '![$1](/api/image?path=$2)'
+    )
+  }, [])
+
   const handleImageUpload = async (file: File, view: any, pos: number) => {
     if (!file.type.startsWith('image/')) return false
     
@@ -50,22 +58,29 @@ export function RichTextEditor() {
   const editor = useEditor({
     extensions: [
       StarterKit,
-      Markdown,
+      Markdown.configure({
+        tightLists: false,
+        bulletListMarker: '-',
+      }),
       Image.configure({
         HTMLAttributes: {
           class: 'rounded-lg shadow-sm max-w-full my-4',
         },
       }),
     ],
-    content: openNote?.content || '',
+    // Initialize with rewritten paths so images render immediately on mount
+    content: openNote ? rewriteMarkdownToApiPaths(openNote.content) : '',
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
       // Serialize rich text into raw markdown
       let markdownOutput = (editor.storage as any).markdown.getMarkdown()
       
       // Post-process: strip internal API path back to relative path for GitHub
-      // Replaces /api/image?path=.images/... with .images/...
       markdownOutput = markdownOutput.replace(/\/api\/image\?path=/g, '')
+      
+      // Ensure block elements (like images) are followed by newlines if they aren't already
+      // to avoid 'concatenation' issues in raw markdown.
+      markdownOutput = markdownOutput.replace(/(\!\[.*?\]\(.*?\))([^\n])/g, '$1\n\n$2')
       
       setContent(markdownOutput)
       debouncedSave()
@@ -110,21 +125,18 @@ export function RichTextEditor() {
     },
   })
 
-  // Watch for external file changes (e.g. clicking a different file in the sidebar)
+  // Watch for external content or path changes
   useEffect(() => {
     if (editor && openNote) {
+      // Get current normalized markdown from editor
       const currentMarkdown = (editor.storage as any).markdown.getMarkdown().replace(/\/api\/image\?path=/g, '')
+      
       if (openNote.content !== currentMarkdown) {
-        // Rewrites relative paths (./.images, .images, notes/.images) to absolute API paths for the editor
-        // We look for patterns like ![](.images/...) or ![](./.images/...) or ![](notes/.images/...)
-        const displayContent = openNote.content.replace(
-          /!\[(.*?)\]\((?:\.\/|notes\/)?(\.images\/.*?)\)/g, 
-          '![$1](/api/image?path=$2)'
-        )
-        editor.commands.setContent(displayContent)
+        // Sync rewritten content to the editor
+        editor.commands.setContent(rewriteMarkdownToApiPaths(openNote.content))
       }
     }
-  }, [openNote?.path, editor]) // Only update when path changes or editor mounts
+  }, [openNote?.path, openNote?.content, editor, rewriteMarkdownToApiPaths])
 
   // Keyboard shortcut to manually save
   useEffect(() => {
