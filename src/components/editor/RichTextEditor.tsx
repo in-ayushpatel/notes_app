@@ -68,25 +68,29 @@ export function RichTextEditor() {
       <div style={{ flex: 1, overflowY: 'auto' }}>
         <style>{`
           .prose-container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 40px;
+            padding: 60px 80px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
           }
-          .ProseMirror p { margin-top: 0; margin-bottom: 1em; line-height: 1.6; color: var(--text-primary); font-size: 15px; }
-          .ProseMirror h1 { font-size: 2em; margin-top: 0; margin-bottom: 0.5em; font-weight: 700; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
-          .ProseMirror h2 { font-size: 1.5em; margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 600; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
-          .ProseMirror h3 { font-size: 1.25em; margin-top: 1em; margin-bottom: 0.5em; font-weight: 600; color: var(--text-primary); }
-          .ProseMirror blockquote { border-left: 4px solid var(--accent); padding-left: 1em; margin-left: 0; color: var(--text-secondary); }
-          .ProseMirror code { background: var(--bg-tertiary); padding: 0.2em 0.4em; border-radius: 6px; font-family: monospace; font-size: 0.9em; }
-          .ProseMirror pre { background: var(--bg-secondary); padding: 1em; border-radius: 8px; overflow-x: auto; color: var(--text-primary); font-family: monospace; }
-          .ProseMirror ul { padding-left: 1.5em; margin-bottom: 1em; list-style-type: disc; }
-          .ProseMirror ol { padding-left: 1.5em; margin-bottom: 1em; list-style-type: decimal; }
-          .ProseMirror li { margin-bottom: 0.3em; }
+          @media (max-width: 768px) {
+            .prose-container { padding: 30px 20px; }
+          }
+          .ProseMirror { min-height: 200px; }
+          .ProseMirror p { margin: 0 0 1.25em; line-height: 1.8; color: #adbac7; font-size: 16px; }
+          .ProseMirror h1 { font-size: 2.5em; margin: 0 0 0.6em; font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em; }
+          .ProseMirror h2 { font-size: 1.8em; margin: 1.6em 0 0.6em; font-weight: 700; color: var(--text-primary); border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.3em; }
+          .ProseMirror h3 { font-size: 1.4em; margin: 1.4em 0 0.6em; font-weight: 600; color: var(--text-primary); }
+          .ProseMirror blockquote { border-left: 4px solid var(--accent); padding: 0.5em 0 0.5em 1.5em; margin: 1.5em 0; color: #768390; font-style: italic; background: rgba(88,166,255,0.05); border-radius: 0 8px 8px 0; }
+          .ProseMirror code { background: rgba(99,110,123,0.3); padding: 0.2em 0.4em; border-radius: 6px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; font-size: 0.85em; color: #e6edf3; }
+          .ProseMirror pre { background: #1c2128; padding: 1.25em; border-radius: 12px; border: 1px solid var(--border); margin: 1.5em 0; overflow-x: auto; }
+          .ProseMirror pre code { background: transparent; padding: 0; border-radius: 0; color: inherit; }
+          .ProseMirror ul, .ProseMirror ol { padding-left: 1.5em; margin: 0 0 1.25em; }
+          .ProseMirror li { margin-bottom: 0.5em; color: #adbac7; line-height: 1.7; }
           .ProseMirror li p { margin: 0; }
-          .ProseMirror a { color: var(--accent); text-decoration: none; }
-          .ProseMirror a:hover { text-decoration: underline; }
-          .ProseMirror hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
-          .ProseMirror img { max-width: 100%; border-radius: 8px; margin: 1em 0; }
+          .ProseMirror hr { border: none; border-top: 2px solid var(--border-subtle); margin: 2.5em 0; }
+          .ProseMirror a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.1s; }
+          .ProseMirror a:hover { border-bottom-color: var(--accent); }
         `}</style>
         <EditorContent editor={editor} style={{ height: '100%' }} />
       </div>

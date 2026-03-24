@@ -30,11 +30,13 @@ export function Toolbar({ editor }: { editor: Editor | null }) {
 
   return (
     <div className="toolbar-container" style={{
-      display: 'flex', gap: '8px', padding: '10px 16px',
-      borderBottom: '1px solid var(--border)', background: 'var(--bg-secondary)',
+      display: 'flex', gap: '8px', padding: '10px 20px',
+      borderBottom: '1px solid var(--border)', background: 'var(--bg-tertiary)',
       overflowX: 'auto', alignItems: 'center', flexShrink: 0,
+      width: '100%', boxSizing: 'border-box',
       scrollbarWidth: 'none', // Firefox
       msOverflowStyle: 'none', // IE/Edge
+      boxShadow: '0 2px 4px rgba(0,0,0,0.08)'
     }}>
       <style>{`
         .toolbar-container::-webkit-scrollbar { display: none; }
