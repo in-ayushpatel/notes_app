@@ -6,7 +6,7 @@ import { useTreeStore } from '@/store/treeStore'
 import { useEditorStore } from '@/store/editorStore'
 import { Sidebar } from '@/components/sidebar/Sidebar'
 import { CommandPalette } from '@/components/ui/CommandPalette'
-import { Editor } from '@/components/editor/Editor'
+import { RichTextEditor } from '@/components/editor/RichTextEditor'
 import { Preview } from '@/components/editor/Preview'
 import { TopBar } from '@/components/editor/TopBar'
 import { TocPanel } from '@/components/editor/TocPanel'
@@ -233,7 +233,7 @@ export default function AppPage() {
                 width: `calc(${splitRatio * 100}% - 2px)`,
                 minWidth: 0, overflow: 'hidden', flexShrink: 0,
               }}>
-                <Editor />
+                <RichTextEditor />
               </div>
 
               {/* Drag handle */}
@@ -263,7 +263,7 @@ export default function AppPage() {
           ) : viewMode === 'preview' ? (
             <Preview />
           ) : (
-            <Editor />
+            <RichTextEditor />
           )}
           </div>
           {viewMode !== 'edit' && <TocPanel />}
