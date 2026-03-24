@@ -269,7 +269,7 @@ export default function AppPage() {
             <Editor />
           )}
           </div>
-          {viewMode !== 'edit' && <TocPanel />}
+          {(viewMode === 'preview' || viewMode === 'split') && <TocPanel />}
         </div>
       </div>
     </div>
