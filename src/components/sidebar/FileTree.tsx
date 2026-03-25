@@ -16,7 +16,7 @@ export function FileTree({ nodes }: { nodes: FileNode[] }) {
   const [deleting, setDeleting] = useState<string | null>(null)
   const [nodeToDelete, setNodeToDelete] = useState<FileNode | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const { openFile, openNote } = useEditorStore()
+  const { openFile, openNote, updateOpenNotePath } = useEditorStore()
   const { refreshTree } = useTreeStore()
   const { indexNote } = useSearchStore()
 
@@ -176,6 +176,9 @@ export function FileTree({ nodes }: { nodes: FileNode[] }) {
               })
               
               if (!res.ok) throw new Error('Move failed on server')
+
+              // Update editor store so saves go to the correct new path
+              updateOpenNotePath(oldPath, newPath)
 
               // Soft refresh to secure actual SHAs post-mutation
               treeState.refreshTree()

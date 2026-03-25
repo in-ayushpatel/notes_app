@@ -12,6 +12,7 @@ interface EditorState {
   setContent: (content: string) => void
   saveNote: () => Promise<void>
   closeNote: () => void
+  updateOpenNotePath: (oldPath: string, newPath: string) => void
 }
 
 export const useEditorStore = create<EditorState>((set, get) => ({
@@ -114,5 +115,24 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   closeNote: () => {
     set({ openNote: null, isDirty: false, saveStatus: { status: 'idle' } })
+  },
+
+  // Called after a drag-and-drop move: keeps the editor live but with the correct new path.
+  updateOpenNotePath: (oldPath: string, newPath: string) => {
+    const { openNote, noteCache } = get()
+    const cache = noteCache
+
+    // Migrate cache entry
+    const cached = cache.get(oldPath)
+    if (cached) {
+      const updated = { ...cached, path: newPath }
+      cache.delete(oldPath)
+      cache.set(newPath, updated)
+    }
+
+    // Update open note if it's the moved file
+    if (openNote?.path === oldPath) {
+      set({ openNote: { ...openNote, path: newPath } })
+    }
   },
 }))
