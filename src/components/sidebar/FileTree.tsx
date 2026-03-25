@@ -15,6 +15,10 @@ export function FileTree({ nodes }: { nodes: FileNode[] }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [nodeToDelete, setNodeToDelete] = useState<FileNode | null>(null)
+  const [renamingPath, setRenamingPath] = useState<string | null>(null)
+  const [renameName, setRenameName] = useState('')
+  const [isRenaming, setIsRenaming] = useState(false)
+  const renameInputRef = useRef<HTMLInputElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const { openFile, openNote, updateOpenNotePath } = useEditorStore()
   const { refreshTree } = useTreeStore()
@@ -23,6 +27,10 @@ export function FileTree({ nodes }: { nodes: FileNode[] }) {
   useEffect(() => {
     if (creating) setTimeout(() => inputRef.current?.focus(), 30)
   }, [creating])
+
+  useEffect(() => {
+    if (renamingPath) setTimeout(() => renameInputRef.current?.focus(), 30)
+  }, [renamingPath])
 
   const toggle = (path: string, e: React.MouseEvent) => {
     e.stopPropagation()
@@ -42,6 +50,59 @@ export function FileTree({ nodes }: { nodes: FileNode[] }) {
   }
 
   const cancelCreate = () => { setCreating(null); setNewName('') }
+
+  const startRename = (e: React.MouseEvent, node: FileNode) => {
+    e.stopPropagation()
+    const displayName = node.type === 'file' ? node.name.replace(/\.md$/, '') : node.name
+    setRenamingPath(node.path)
+    setRenameName(displayName)
+  }
+
+  const cancelRename = () => { setRenamingPath(null); setRenameName('') }
+
+  const submitRename = async (node: FileNode) => {
+    const trimmed = renameName.trim()
+    if (!trimmed || isRenaming) { cancelRename(); return }
+
+    // Compute new name with extension for files
+    const newFileName = node.type === 'file'
+      ? (trimmed.endsWith('.md') ? trimmed : trimmed + '.md')
+      : trimmed
+
+    // Same name → no-op
+    if (newFileName === node.name) { cancelRename(); return }
+
+    // Compute new path (same parent directory)
+    const parentPath = node.path.split('/').slice(0, -1).join('/')
+    const newPath = `${parentPath}/${newFileName}`
+
+    setIsRenaming(true)
+    cancelRename()
+
+    try {
+      // Optimistic tree update
+      const treeState = useTreeStore.getState()
+      treeState.moveNode(node.path, newPath)
+
+      const res = await fetch('/api/file/move', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oldPath: node.path, newPath, type: node.type, sha: node.sha }),
+      })
+
+      if (!res.ok) throw new Error('Rename failed on server')
+
+      // Update editor store path if this note is currently open
+      updateOpenNotePath(node.path, newPath)
+
+      treeState.refreshTree()
+    } catch (err) {
+      console.error('Rename error:', err)
+      useTreeStore.getState().fetchTree() // Revert on failure
+    } finally {
+      setIsRenaming(false)
+    }
+  }
 
   const submitCreate = async () => {
     if (!newName.trim() || !creating) { cancelCreate(); return }
@@ -226,13 +287,33 @@ export function FileTree({ nodes }: { nodes: FileNode[] }) {
             {isFolder ? (isExpanded ? '📂' : '📁') : '📄'}
           </span>
 
-          {/* Name */}
-          <span style={{
-            flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            fontWeight: isOpen ? '500' : '400',
-          }}>
-            {isFolder ? node.name : node.name.replace(/\.md$/, '')}
-          </span>
+          {/* Name — shows input when renaming */}
+          {renamingPath === node.path ? (
+            <input
+              ref={renameInputRef}
+              value={renameName}
+              onChange={e => setRenameName(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') submitRename(node)
+                if (e.key === 'Escape') cancelRename()
+              }}
+              onBlur={() => submitRename(node)}
+              onClick={e => e.stopPropagation()}
+              style={{
+                flex: 1, background: 'var(--bg-tertiary)',
+                border: '1px solid var(--accent)', borderRadius: '4px',
+                color: 'var(--text-primary)', padding: '1px 6px',
+                fontSize: '12px', outline: 'none', minWidth: 0,
+              }}
+            />
+          ) : (
+            <span style={{
+              flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              fontWeight: isOpen ? '500' : '400',
+            }}>
+              {isFolder ? node.name : node.name.replace(/\.md$/, '')}
+            </span>
+          )}
 
           {/* Action buttons — shown on hover */}
           {isHovered && (
@@ -265,6 +346,17 @@ export function FileTree({ nodes }: { nodes: FileNode[] }) {
                   <span style={{ fontSize: '11px', fontWeight: '700', lineHeight: 1 }}>+📁</span>
                 </button>
               )}
+
+              {/* Rename */}
+              <button
+                title="Rename"
+                onClick={e => startRename(e, node)}
+                style={btnStyle('#6e7681')}
+                onMouseEnter={e => hoverIn(e, '#388bfd')}
+                onMouseLeave={e => hoverOut(e, '#6e7681')}
+              >
+                <span style={{ fontSize: '11px', lineHeight: 1 }}>✏️</span>
+              </button>
 
               {/* Delete */}
               <button
